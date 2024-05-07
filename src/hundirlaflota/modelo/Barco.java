@@ -11,12 +11,14 @@
   * 
   */
 
-package hundirlaflota;
+package hundirlaflota.modelo;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.HashSet;
+
+import hundirlaflota.control.Partida;
 
 public class Barco {
     private Set<Posicion> posiciones;
@@ -36,6 +38,10 @@ public class Barco {
   public Barco(Scanner scanner) throws Exception {
     posiciones = new HashSet<Posicion>();
     while(scanner.hasNext()) {
+      
+      if(scanner.hasNext(Partida.DELIMITADOR_POSICIONES)) {
+        break;
+      }
       posiciones.add(new Posicion(scanner));
     }
   }
@@ -150,7 +156,5 @@ public class Barco {
     return posiciones.hashCode();
   }
 
-public String obtenerNombre() {
-    return "hola";
-}
+
 }

@@ -1,4 +1,4 @@
-package hundirlaflota;
+package hundirlaflota.modelo;
 
 import java.util.HashSet;
 import java.util.Random;

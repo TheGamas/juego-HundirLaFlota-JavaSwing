@@ -11,14 +11,19 @@
   * 
   */
 
-package hundirlaflota;
+package hundirlaflota.modelo;
+
+import hundirlaflota.control.HundirLaFlota;
 import java.util.Random;
 import java.util.Scanner;
+
 
 public class Posicion {
     private int columna;
     private int fila;
     private boolean tocada;
+
+    public enum EstadoPosicion { NO_TOCADA, TOCADA_AGUA, TOCADA_BARCO, BARCOS_ADYACENTES}
 
   /**
    * Construye una posición con el estado
@@ -112,5 +117,9 @@ public class Posicion {
     int resultado = 17;
     resultado = 37 * resultado + columna;
     return 37 * resultado + fila;
+  }
+
+  public String to() {
+    return "Posicion [columna=" + columna + ", fila=" + fila + ", tocada=" + tocada + "]";
   }
 }

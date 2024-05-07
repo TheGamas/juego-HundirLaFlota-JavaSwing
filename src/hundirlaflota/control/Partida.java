@@ -11,7 +11,7 @@
   * 
   */
 
-package hundirlaflota;
+package hundirlaflota.control;
 import java.io.BufferedWriter;
 import java.io.FileInputStream;
 import java.io.FileWriter;
@@ -19,31 +19,58 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Scanner;
 
+import hundirlaflota.modelo.FactoriaBarcos;
+import hundirlaflota.modelo.Posicion;
+import hundirlaflota.modelo.Tablero;
+import hundirlaflota.vista.PartidaVista;
+
 public class Partida {
     private Tablero tablero;
+    private boolean guardada;
 
-    static final int EXITO_COLOCAR = 1;
-    static final int BARCO_DEMASIADO_GRANDE = 2;
-    static final int DEMASIADOS_BARCOS = 3;
-    static final int BARCO_DESCONOCIDO = -1;
-    static final int EXITO_CARGAR = 5;
+    public static int EXITO_COLOCAR = 1;
+    public static int BARCO_DEMASIADO_GRANDE = 2;
+    public static int DEMASIADOS_BARCOS = 3;
+    public static int BARCO_DESCONOCIDO = -1;
+    public static int EXITO_CARGAR = 5;
+    public static final String DELIMITADOR_POSICIONES = ";";
 
-    static final String DELIMITADOR = "#";
+    public static String DELIMITADOR_BARCOS = "#";
 
   /**
    * Construye una partida nueva
    * 
    */
-  public Partida(int columnas, int filas) {
+  public Partida(PartidaVista vista, int columnas, int filas) {
     tablero = new Tablero(columnas, filas);
+    tablero.nuevoObservador(vista);
+    guardada = false;
+
+
+  }
+
+  public Partida(PartidaVista vista, String nombreFichero) throws Exception {  
+       
+    recuperar(nombreFichero);
+    
+    guardada = true;
+    
+    tablero.nuevoObservador(vista);
+    vista.recuperarPartida(tablero);
+  }
+
+  public void enviarBarcosRestantes(){
+    tablero.enviarBarcosRestantes();
   }
   
   /**
    * Realiza un disparo
    * 
    */  
-  public int disparar(Posicion posicion) {
+  public Posicion.EstadoPosicion disparar(Posicion posicion) {
+    guardada = false;
     return tablero.disparar(posicion);
+
   }
  
   /**
@@ -54,17 +81,20 @@ public class Partida {
     PrintWriter fichero = 
       new PrintWriter(new BufferedWriter(new FileWriter(nombreFichero)));    
     
-    tablero.guardar(fichero);    
+    tablero.guardar(fichero); 
     fichero.close();
+    guardada = true;   
+
   }
 
   /**
-   * Carga una partida 
+   * Carga una partida desde un fichero
    * 
    */  
-  public Partida(String nombreFichero) throws Exception {
+  private void recuperar(String nombreFichero) throws Exception {
     Scanner fichero = new Scanner(new FileInputStream(nombreFichero));
     tablero = new Tablero(fichero);
+
     fichero.close();
   }
 
@@ -80,9 +110,18 @@ public class Partida {
   }
 
   /**
+   *  Devuelve si partida está guardada
+   * 
+   */    
+  boolean guardada() {
+    return guardada;
+  }
+
+  /**
    * Devuelve un String de la partida
    * 
    */
+  @Override
   public String toString() {
     String cadena = "";
     cadena = cadena + HundirLaFlota.VERSION + "\n";

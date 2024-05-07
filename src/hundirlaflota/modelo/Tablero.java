@@ -11,32 +11,41 @@
   * 
   */
 
-package hundirlaflota;
+package hundirlaflota.modelo;
+
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Scanner;
 import java.util.Set;
+
+
+import hundirlaflota.control.HundirLaFlota;
+import hundirlaflota.control.Partida;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 
 public class Tablero {
     private Map<String, Set<Barco>> barcos;
     private int filas;
     private int columnas;
     private Set<Posicion> jugadasFallidas;
+      private PropertyChangeSupport observadores;
+
 
     static final int HORIZONTAL = 0;
     static final int VERTICAL = 1;
     
     //Disparos
-    static final int BARCO_TOCADO = 0;
-    static final int AGUA = 1;
-    static final int BARCOS_ADYACENTES = 2;
-    static final int FUERA = 3;
 
     static final int INTENTOS_MAX_COLOCAR = 20;
     static final char PRIMERA_LETRA = 'A';
+
+    
 
   /**
    * Construye el tablero
@@ -45,8 +54,15 @@ public class Tablero {
   public Tablero(int columnas, int filas) {
     this.filas = filas;
     this.columnas = columnas;
+    observadores = new PropertyChangeSupport(this);
+    
     this.barcos = new HashMap<String, Set<Barco>>();
     this.jugadasFallidas = new HashSet<Posicion>();
+
+  }
+
+  public void enviarBarcosRestantes(){
+    observadores.firePropertyChange("barcosRestantes", null, barcosRestantes());
   }
 
   /**
@@ -56,81 +72,67 @@ public class Tablero {
   public Tablero(Scanner scanner) throws Exception {
     columnas = scanner.nextInt();
     filas = scanner.nextInt();
-
+    observadores = new PropertyChangeSupport(this);
     cargarBarcos(scanner);
     cargarJugadasFallidas(scanner);
+    
+  }
+  /**
+  *  Añade observador del tablero
+  *  
+  */     
+  public void nuevoObservador(PropertyChangeListener observador) {
+    observadores.addPropertyChangeListener(observador);
+  }
+
+  private Map<String, Integer> barcosRestantes(){
+    Map <String, Integer> barcosRestantes = new HashMap<String, Integer>();
+    for(String tipoBarco : barcos.keySet()) {
+      barcosRestantes.put(tipoBarco, cuantosBarcosQuedan(tipoBarco));
+    }
+    return barcosRestantes;  
   }
 
   /**
    * Realiza un disparo
    * 
    */  
-  public int disparar(Posicion posicion) {
+  public Posicion.EstadoPosicion disparar(Posicion posicion) {
 
     posicion.disparar();
+    enviarBarcosRestantes();
+    
 
-    if(estaFuera(posicion)) {
-      return FUERA;
-    }
     for(Set<Barco> barcos : barcos.values()) {
       for(Barco barco : barcos)
       if(barco.disparar(posicion)) {
-          return BARCO_TOCADO;
+        enviarBarcosRestantes();
+        return Posicion.EstadoPosicion.TOCADA_BARCO;
       }
     }
     jugadasFallidas.add(posicion);
     if(hayBarcosAdyacentes(posicion)) {
-      return BARCOS_ADYACENTES;
+      return Posicion.EstadoPosicion.TOCADA_AGUA;
     }
-    return AGUA;
-  }
 
-  /**
-   * Devuelve un string del tablero
-   * 
-   */
-  public String toString() {
     
-    String tablero = "";
-    char letra = '\0';
+    return Posicion.EstadoPosicion.NO_TOCADA;
+}
 
-    //Poner primera linea
-    letra = PRIMERA_LETRA;
-    tablero = tablero + ' ';
-    for(int columna = 0; columna < columnas; columna++) {
-      tablero = tablero + " " + letra++;
-    }
-    tablero = tablero + "\n";
-    letra = PRIMERA_LETRA;
-    //Poner resto de lineas
-    for(int fila = 0; fila < filas; fila++) {
-      tablero = tablero + letra++;
-      for(int columna = 0; columna < columnas; columna++) {
-        tablero = tablero + " " + toStringPosicion(new Posicion(columna, fila));
-      }
-      tablero = tablero + "\n";
-    }
-    return tablero;
-  }
-
-  /**
-   * Devuelve el String que equivale a una posición del tablero
-   *
-   */
-  private String toStringPosicion(Posicion posicion) {
-    
-    String ficha = "";
-
+  public Posicion.EstadoPosicion estadoPosicion(Posicion posicion){
     if(estaTocada(posicion)) {
-      ficha = HundirLaFlotaTest.BARCO_SIMBOLO;
+      return Posicion.EstadoPosicion.TOCADA_BARCO;
     }
     else if(esAgua(posicion)) {
-      ficha = HundirLaFlotaTest.DISPARO_AGUA_SIMBOLO;
+      return Posicion.EstadoPosicion.TOCADA_AGUA;
+    }
+    else if (hayBarcosAdyacentes(posicion)){
+      return Posicion.EstadoPosicion.BARCOS_ADYACENTES;
     }
     else {
-      ficha = " ";
+      return Posicion.EstadoPosicion.NO_TOCADA;
+
     }
-    return ficha;
   }
 
   /**
@@ -235,11 +237,10 @@ public class Tablero {
    * Devuelve el resultado de su colocación 
    */
   public int colocarBarco(String tipoBarco) {
-  
     int intentos = 0;
     Barco barco = FactoriaBarcos.crear(tipoBarco);
 
-    if(barcos.values().size() == HundirLaFlota.MAXBARCOS) {
+    if(barcos.values().size() == HundirLaFlota.MAX_BARCOS) {
       return Partida.DEMASIADOS_BARCOS;
     }
 
@@ -294,17 +295,20 @@ public class Tablero {
            estaOcupada(new Posicion(columna, fila + 1))     ||
            estaOcupada(new Posicion(columna + 1, fila + 1));
   }
-
   /**
    * Guarda los barcos en un fichero
    * 
    */
   private void guardarBarcos(PrintWriter pw) throws IOException {
-    for(Set<Barco> barcosTipo : barcos.values()) {
-      for(Barco barco : barcosTipo) {
+    for(Entry<String, Set<Barco>> barcosTipo : barcos.entrySet()) {
+      pw.print(barcosTipo.getKey());
+      pw.print(" ");
+      for(Barco barco : barcosTipo.getValue()) {
         barco.guardar(pw);
-        pw.print("\n");
+        pw.print(Partida.DELIMITADOR_POSICIONES);
+        pw.print(" ");
       }
+      pw.print("\n");
     }
   }
 
@@ -327,10 +331,14 @@ public class Tablero {
   public void guardar(PrintWriter pw) throws IOException {
     pw.println(columnas + " " + filas);
     guardarBarcos(pw);
-    pw.println(Partida.DELIMITADOR);
+    pw.println(Partida.DELIMITADOR_BARCOS);
     guardarPosicionesFallidas(pw); 
   }
 
+  /**
+   * Carga los barcos desde un fichero
+   * 
+   */
   /**
    * Carga los barcos desde un fichero
    * 
@@ -342,22 +350,26 @@ public class Tablero {
     scanner.nextLine();
     while (scanner.hasNextLine()) {
       
-      if(scanner.hasNext(Partida.DELIMITADOR)) {
+      if(scanner.hasNext(Partida.DELIMITADOR_BARCOS)) {
         break;
       }
       String linea = scanner.nextLine();
       Scanner lineScanner = new Scanner (linea);
-      Barco barco = new Barco(lineScanner);
+      String tipoBarco = lineScanner.next();
+      
+      while (lineScanner.hasNext()) {
+        Barco barco = new Barco(lineScanner);
+        lineScanner.next();
+        
+        barcosTipo = barcos.getOrDefault(tipoBarco, new HashSet<>());
+        barcosTipo.add(barco);
+        barcos.put(tipoBarco, barcosTipo);
+      }
       lineScanner.close();
-      String tipoBarco = barco.obtenerNombre();
-
-      barcosTipo = barcos.getOrDefault(tipoBarco, new HashSet<>());
-      barcosTipo.add(barco);
-      barcos.put(tipoBarco, barcosTipo);
     }
-    
     return Partida.EXITO_CARGAR;
   }
+
   
   /**
    * Carga las jugadas fallidas desde un fichero
@@ -371,5 +383,25 @@ public class Tablero {
     while (scanner.hasNext()) {
       jugadasFallidas.add(new Posicion(scanner));
     }
+  }
+
+  public String toString() {
+    String tablero = "";
+    for(int fila = 0; fila < filas; fila++) {
+      for(int columna = 0; columna < columnas; columna++) {
+        Posicion posicion = new Posicion(columna, fila);
+        if(estaTocada(posicion)) {
+          tablero += "X";
+        }
+        else if(esAgua(posicion)) {
+          tablero += "O";
+        }
+        else {
+          tablero += " ";
+        }
+      }
+      tablero += "\n";
+    }
+    return tablero;
   }
 }
