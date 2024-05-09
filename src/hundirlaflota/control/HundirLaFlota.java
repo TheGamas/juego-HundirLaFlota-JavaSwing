@@ -241,5 +241,4 @@ public class HundirLaFlota implements OyenteVista{
   public static void main(String[] args) {
     new HundirLaFlota(args);
   }
-    
 }

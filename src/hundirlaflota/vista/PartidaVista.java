@@ -77,6 +77,11 @@ public class PartidaVista extends JFrame implements ActionListener, PropertyChan
   private ImageIcon iconoJugadaFallida;
   private JTextArea estadisticas;
 
+  private JLabel contadorPortaviones;
+  private JLabel contadorCruceros;
+  private JLabel contadorDestructores;
+  private JLabel contadorFragatas;
+
   
   /**
    * Construye la vista del tablero de filas x columnas con el oyente para
@@ -204,29 +209,34 @@ public class PartidaVista extends JFrame implements ActionListener, PropertyChan
    * Crea la vista de las estadisticas
    * 
    */
-  private void creaEstadisticas(JPanel panel) {
-    
-    estadisticas = new JTextArea();
-    estadisticas.setText("Barcos sin hundir\n" +
-    "Portaaviones    0\n" +
-    "Cruceros        0\n" +
-    "Destructores    1\n" +
-    "Fragatas        2");
-    
-    estadisticas.setEditable(false); // Para que el usuario no pueda modificar el texto
-    estadisticas.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+  /**
+   * Crea la vista de las estadisticas
+   * 
+   */
+  public void creaEstadisticas(JPanel panel) {
+    JPanel panelEstadisticas = new JPanel(new GridLayout(4, 2)); // 4 filas, 2 columnas
 
-    // Crear un panel para las estadísticas y añadir el JTextArea a él
-    JPanel panelEstadisticas = new JPanel();
-    panelEstadisticas.add(estadisticas);
+    JLabel etiquetaPortaviones = new JLabel("Portaviones:");
+    contadorPortaviones = new JLabel();
+    panelEstadisticas.add(etiquetaPortaviones);
+    panelEstadisticas.add(contadorPortaviones);
 
-    // Configurar el panel principal para usar un BoxLayout
-    panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+    JLabel etiquetaCruceros = new JLabel("Crucero:");
+    contadorCruceros = new JLabel();
+    panelEstadisticas.add(etiquetaCruceros);
+    panelEstadisticas.add(contadorCruceros);
 
-    // Añadir un componente de relleno al principio y al final del panel principal
-    panel.add(Box.createVerticalGlue());
+    JLabel etiquetaDestructor = new JLabel("Destructor:");
+    contadorDestructores = new JLabel();
+    panelEstadisticas.add(etiquetaDestructor);
+    panelEstadisticas.add(contadorDestructores);
+
+    JLabel etiquetaFragata = new JLabel("Fragata:");
+    contadorFragatas = new JLabel();
+    panelEstadisticas.add(etiquetaFragata);
+    panelEstadisticas.add(contadorFragatas);
+
     panel.add(panelEstadisticas);
-    panel.add(Box.createVerticalGlue());
   }
 
   /**
@@ -405,6 +415,8 @@ public class PartidaVista extends JFrame implements ActionListener, PropertyChan
         }
       }
     }
+
+    private void incrementarContadores(){}
 
     public void actualizarEstadisticas(Map<String, Integer> barcosRestantes) {
       estadisticas.setText("Barcos sin hundir\n" +

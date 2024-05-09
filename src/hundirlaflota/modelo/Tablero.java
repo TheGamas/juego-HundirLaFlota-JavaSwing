@@ -22,6 +22,7 @@ import java.util.Set;
 
 
 import hundirlaflota.control.HundirLaFlota;
+import hundirlaflota.control.OyenteVista;
 import hundirlaflota.control.Partida;
 
 import java.util.HashMap;
@@ -61,9 +62,6 @@ public class Tablero {
 
   }
 
-  public void enviarBarcosRestantes(){
-    observadores.firePropertyChange("barcosRestantes", null, barcosRestantes());
-  }
 
   /**
    * Carga el tablero
@@ -100,24 +98,30 @@ public class Tablero {
   public Posicion.EstadoPosicion disparar(Posicion posicion) {
 
     posicion.disparar();
-    enviarBarcosRestantes();
-    
+    String nombre = null;
 
-    for(Set<Barco> barcos : barcos.values()) {
-      for(Barco barco : barcos)
-      if(barco.disparar(posicion)) {
-        enviarBarcosRestantes();
-        return Posicion.EstadoPosicion.TOCADA_BARCO;
+    for(Entry<String, Set<Barco>> barcosTipo : barcos.entrySet()) {
+      nombre = barcosTipo.getKey();
+      for(Barco barco : barcosTipo.getValue()) {
+        if(barco.disparar(posicion)) {
+          if (barco.estaHundido()){
+            observadores.firePropertyChange("HUNDIDO", null, nombre);
+          }
+          else{
+            observadores.firePropertyChange("TOCADO", null, posicion);
+          }
+          return Posicion.EstadoPosicion.TOCADA_BARCO;
+        }
       }
-    }
-    jugadasFallidas.add(posicion);
-    if(hayBarcosAdyacentes(posicion)) {
-      return Posicion.EstadoPosicion.TOCADA_AGUA;
-    }
+      jugadasFallidas.add(posicion);
+      if(hayBarcosAdyacentes(posicion)) {
+        return Posicion.EstadoPosicion.TOCADA_AGUA;
+      }
 
     
-    return Posicion.EstadoPosicion.NO_TOCADA;
-}
+  } 
+  return Posicion.EstadoPosicion.NO_TOCADA;
+  }
 
   public Posicion.EstadoPosicion estadoPosicion(Posicion posicion){
     if(estaTocada(posicion)) {
@@ -403,5 +407,6 @@ public class Tablero {
       tablero += "\n";
     }
     return tablero;
+  
   }
 }
