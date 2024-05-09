@@ -1,3 +1,16 @@
+/**
+ * FactoriaBarcos.java
+ * 
+ * Versión 2 David Colás (funcionamiento) y Samuel Felipe (calidad) (05/2024)
+ * - Código jugar, cargar y guardar partida
+ *  
+ */
+
+/**
+ * Clase de control para la creación de barcos
+ * 
+ */
+
 package hundirlaflota.modelo;
 
 import java.util.HashSet;
@@ -18,7 +31,10 @@ public class FactoriaBarcos {
     static final int HORIZONTAL = 0;
     static final int VERTICAL = 1;
 
-
+    /**
+     * Construye un barco a partir de su nombre
+     * 
+     */
     public static Barco crear(String nombreBarco) {
         
         if(nombreBarco.equals(PORTAVIONES)) {
@@ -35,22 +51,42 @@ public class FactoriaBarcos {
 
     }
 
+    /**
+     * Crea un barco de tipo portaviones
+     * 
+     */
     private static Barco portaviones() {
         return barcoLineal(LONGITUD_PORTAVIONES);
     }   
 
+    /**
+     * Crear un barco de tipo crucero
+     * 
+     */
     private static Barco crucero() {
         return barcoLineal(LONGITUD_CRUCERO);
     }
 
+    /**
+     * Crear un barco de tipo destructor
+     * 
+     */
     private static Barco destructor() {
         return barcoLineal(LONGITUD_DESTRUCTOR); 
     }
 
+    /**
+     * Crear un barco de tipo fragata
+     * 
+     */
     private static Barco fragata() {
         return barcoLineal(LONGITUD_FRAGATAS); 
     }
 
+    /**
+     * Crear un barco lineal
+     * 
+     */
     private static Barco barcoLineal(int longitud) {
     
       Set<Posicion> posicionesBarco = new HashSet<Posicion>();
@@ -74,6 +110,5 @@ public class FactoriaBarcos {
         fila = fila + incFila;
       }
       return new Barco(posicionesBarco);
-    
     }
 }

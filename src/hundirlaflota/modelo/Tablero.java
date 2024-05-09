@@ -1,15 +1,15 @@
 /**
  * Tablero.java
  * 
- * Versión 1 David Colás (calidad) y Samuel Felipe (funcionamiento) (02/2024)
- * - Código para jugar, guardar y recuperar partida
+ * Versión 2 David Colás (funcionamiento) y Samuel Felipe (calidad) (05/2024)
+ * - Código jugar, cargar y guardar partida
  *  
  */
 
- /**
-  * Clase para el tablero de juego
-  * 
-  */
+/**
+ * Clase de control para el tablero de juego
+ * 
+ */
 
 package hundirlaflota.modelo;
 
@@ -22,7 +22,6 @@ import java.util.Set;
 
 
 import hundirlaflota.control.HundirLaFlota;
-import hundirlaflota.control.OyenteVista;
 import hundirlaflota.control.Partida;
 
 import java.util.HashMap;
@@ -62,7 +61,6 @@ public class Tablero {
 
   }
 
-
   /**
    * Carga el tablero
    * 
@@ -75,20 +73,13 @@ public class Tablero {
     cargarJugadasFallidas(scanner);
     
   }
+
   /**
   *  Añade observador del tablero
   *  
   */     
   public void nuevoObservador(PropertyChangeListener observador) {
     observadores.addPropertyChangeListener(observador);
-  }
-
-  private Map<String, Integer> barcosRestantes(){
-    Map <String, Integer> barcosRestantes = new HashMap<String, Integer>();
-    for(String tipoBarco : barcos.keySet()) {
-      barcosRestantes.put(tipoBarco, cuantosBarcosQuedan(tipoBarco));
-    }
-    return barcosRestantes;  
   }
 
   /**
@@ -98,31 +89,33 @@ public class Tablero {
   public Posicion.EstadoPosicion disparar(Posicion posicion) {
 
     posicion.disparar();
+    boolean estabaHundido = false;
     String nombre = null;
-
     for(Entry<String, Set<Barco>> barcosTipo : barcos.entrySet()) {
       nombre = barcosTipo.getKey();
       for(Barco barco : barcosTipo.getValue()) {
+        estabaHundido = barco.estaHundido();
         if(barco.disparar(posicion)) {
-          if (barco.estaHundido()){
+          if (barco.estaHundido() && ! estabaHundido){
             observadores.firePropertyChange("HUNDIDO", null, nombre);
           }
-          else{
-            observadores.firePropertyChange("TOCADO", null, posicion);
-          }
+          observadores.firePropertyChange("TOCADO", null, posicion);
           return Posicion.EstadoPosicion.TOCADA_BARCO;
         }
       }
+      observadores.firePropertyChange("AGUA", null, posicion);
       jugadasFallidas.add(posicion);
       if(hayBarcosAdyacentes(posicion)) {
-        return Posicion.EstadoPosicion.TOCADA_AGUA;
+        observadores.firePropertyChange("ADYACENTES", null, null);
       }
-
-    
-  } 
+    } 
   return Posicion.EstadoPosicion.NO_TOCADA;
   }
 
+  /**
+   * Devuelve el estado de una posición
+   * 
+   */
   public Posicion.EstadoPosicion estadoPosicion(Posicion posicion){
     if(estaTocada(posicion)) {
       return Posicion.EstadoPosicion.TOCADA_BARCO;
@@ -299,6 +292,7 @@ public class Tablero {
            estaOcupada(new Posicion(columna, fila + 1))     ||
            estaOcupada(new Posicion(columna + 1, fila + 1));
   }
+  
   /**
    * Guarda los barcos en un fichero
    * 
@@ -339,10 +333,6 @@ public class Tablero {
     guardarPosicionesFallidas(pw); 
   }
 
-  /**
-   * Carga los barcos desde un fichero
-   * 
-   */
   /**
    * Carga los barcos desde un fichero
    * 
@@ -388,7 +378,10 @@ public class Tablero {
       jugadasFallidas.add(new Posicion(scanner));
     }
   }
-
+   /**
+    * Representación del tablero
+    * 
+    */
   public String toString() {
     String tablero = "";
     for(int fila = 0; fila < filas; fila++) {
@@ -396,6 +389,9 @@ public class Tablero {
         Posicion posicion = new Posicion(columna, fila);
         if(estaTocada(posicion)) {
           tablero += "X";
+        }
+        if(estaOcupada(posicion)) {
+          tablero += "B";
         }
         else if(esAgua(posicion)) {
           tablero += "O";
@@ -407,6 +403,5 @@ public class Tablero {
       tablero += "\n";
     }
     return tablero;
-  
   }
 }

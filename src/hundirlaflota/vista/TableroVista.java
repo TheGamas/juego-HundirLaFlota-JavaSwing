@@ -1,3 +1,16 @@
+/**
+ * TableroVista.java
+ * 
+ * Versión 2 David Colás (funcionamiento) y Samuel Felipe (calidad) (05/2024)
+ * - Código jugar, cargar y guardar partida
+ *  
+ */
+
+/**
+ * Clase de la vista para el tablero
+ * 
+ */
+
 package hundirlaflota.vista;
 
 import java.awt.Dimension;
@@ -8,6 +21,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
 import hundirlaflota.modelo.Posicion;
+
 /**
  * Vista de una posicion a partir de un JLabel
  */
@@ -63,6 +77,7 @@ public class TableroVista extends JPanel {
         }       
     }
   }
+
   /**
    * Inicializa tablero
    * 
@@ -105,6 +120,4 @@ public class TableroVista extends JPanel {
     casillas[posicion.obtenerColumna()][posicion.obtenerFila()]
       .ponerIcono(icono);
   }
-
-    
 }

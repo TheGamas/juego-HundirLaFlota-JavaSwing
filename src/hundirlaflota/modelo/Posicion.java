@@ -1,15 +1,15 @@
 /**
  * Posicion.java
  * 
- * Versión 1 David Colás (calidad) y Samuel Felipe (funcionamiento) (02/2024)
- * - Código para jugar, guardar y recuperar partida
+ * Versión 2 David Colás (funcionamiento) y Samuel Felipe (calidad) (05/2024)
+ * - Código jugar, cargar y guardar partida
  *  
  */
 
- /**
-  * Clase para las posiciones del tablero
-  * 
-  */
+/**
+ * Clase de control para representar una posición en el tablero
+ * 
+ */
 
 package hundirlaflota.modelo;
 
@@ -112,14 +112,14 @@ public class Posicion {
             fila == ((Posicion)obj).fila);
   }
 
+  /**
+   * Sobreescribe el método hashCode
+   * 
+   */
   @Override
   public int hashCode() {
     int resultado = 17;
     resultado = 37 * resultado + columna;
     return 37 * resultado + fila;
-  }
-
-  public String to() {
-    return "Posicion [columna=" + columna + ", fila=" + fila + ", tocada=" + tocada + "]";
   }
 }

@@ -1,15 +1,15 @@
 /**
  * Barco.java
  * 
- * Versión 1 David Colás (calidad) y Samuel Felipe (funcionamiento) (02/2024)
- * - Código para jugar, guardar y recuperar partida
+ * Versión 2 David Colás (funcionamiento) y Samuel Felipe (calidad) (05/2024)
+ * - Código jugar, cargar y guardar partida
  *  
  */
 
- /**
-  * Clase para los barcos del juego
-  * 
-  */
+/**
+ * Clase de control para los barcos del juego
+ * 
+ */
 
 package hundirlaflota.modelo;
 import java.io.IOException;
@@ -102,7 +102,6 @@ public class Barco {
     return false;
   }
 
-
   /**
    * Devuelve verdadero si el barco se solapa con otro barco
    * 
@@ -118,7 +117,6 @@ public class Barco {
     }
     return false;
   }
-
   
   /**
    * Devuelve las posiciones del barco
@@ -140,6 +138,10 @@ public class Barco {
     }
   }
 
+  /**
+   * Sobreescribe el metodo equals
+   * 
+   */
   @Override
   public boolean equals(Object obj) {
     if( ! (obj instanceof Barco) || obj == null) {
@@ -151,10 +153,12 @@ public class Barco {
     return (posiciones.equals(((Barco)obj).posiciones));
   }
 
+  /**
+   * Sobreescribe el metodo hashCode
+   * 
+   */
   @Override
   public int hashCode() {
     return posiciones.hashCode();
   }
-
-
 }

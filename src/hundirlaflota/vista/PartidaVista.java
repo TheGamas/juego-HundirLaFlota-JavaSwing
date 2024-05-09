@@ -1,10 +1,20 @@
+/**
+ * PartidaVista.java
+ * 
+ * Versión 2 David Colás (funcionamiento) y Samuel Felipe (calidad) (05/2024)
+ * - Código jugar, cargar y guardar partida
+ *  
+ */
+
+/**
+ * Clase de la vista para la partida
+ * 
+ */
+
 package hundirlaflota.vista;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -41,21 +51,20 @@ public class PartidaVista extends JFrame implements ActionListener, PropertyChan
   private static final String MENU_ITEM_ACERCA_DE = "Acerca de...";
   
   
-  public static final String EXT_FICHERO_PARTIDA = ".ter";
+  public static final String EXT_FICHERO_PARTIDA = ".txt";
   public static final String FILTRO_PARTIDAS = "Partidas";
-  public static final String TURNO = "Turno de ";
   public static final String CONFIRMACION_GUARDAR = 
           "¿Quieres guardar la partida actual?";
-  public static final String PARTIDA_FIN_TRES_EN_RAYA = "¡¡ Tres en raya !!";
-  public static final String PARTIDA_FIN_EMPATE = "¡¡ Empate !!";
   public static final String PARTIDA_NO_GUARDADA = "No pudo guardarse partida";
   public static final String PARTIDA_NO_LEIDA = "No pudo leerse partida";
   public static final String FICHERO_NO_ENCONTRADO = "Fichero no encontrado";
+  public static final String MENSAJE_ADYACENTES = "Hay barcos adyacentes";
+  
  
-  /* ficheros de recursos */
+  /* Ficheros de recursos */
   private static final String RUTA_RECURSOS = "/hundirlaflota/vista/recursos/";
   
-  /** Constantes para redimensionamiento */
+  /* Constantes para redimensionamiento */
   private static final int MARGEN_HORIZONTAL = 50;
   private static final int MARGEN_VERTICAL = 100;
 
@@ -75,12 +84,11 @@ public class PartidaVista extends JFrame implements ActionListener, PropertyChan
   private JButton botonSalir;
   private ImageIcon iconoBarco;
   private ImageIcon iconoJugadaFallida;
-  private JTextArea estadisticas;
-
   private JLabel contadorPortaviones;
   private JLabel contadorCruceros;
   private JLabel contadorDestructores;
   private JLabel contadorFragatas;
+  private JLabel mensajeAdyacentes;
 
   
   /**
@@ -107,7 +115,7 @@ public class PartidaVista extends JFrame implements ActionListener, PropertyChan
     JPanel panelNorte = new JPanel();
     panelNorte.setLayout(new FlowLayout(FlowLayout.LEFT));
     
-    // creamos elementos
+    // Creamos elementos
     creaBarraHerramientas(panelNorte);
     add(panelNorte, BorderLayout.NORTH);
     
@@ -121,8 +129,18 @@ public class PartidaVista extends JFrame implements ActionListener, PropertyChan
     
 
     JPanel panelDerecho = new JPanel();
-    creaEstadisticas(panelDerecho);
+    panelDerecho.setLayout(new BoxLayout(panelDerecho, BoxLayout.PAGE_AXIS));
+
+    JPanel panelEstadisticas = new JPanel();
+    creaEstadisticas(panelEstadisticas);
+    panelDerecho.add(panelEstadisticas);
+    mensajeAdyacentes = new JLabel();
+    panelDerecho.add(mensajeAdyacentes);
+    panelDerecho.add(Box.createVerticalGlue());
     add(panelDerecho, BorderLayout.EAST);
+    
+
+
 
     panelCentral.add(panelIzquierdo);
     panelCentral.add(panelDerecho);
@@ -145,16 +163,20 @@ public class PartidaVista extends JFrame implements ActionListener, PropertyChan
     iconoJugadaFallida = new ImageIcon(getClass().getResource(RUTA_RECURSOS + "cruz_cursor.png"));
     
     
-    // hacemos visible con el tamaño y la posición deseados     
+    // Hacemos visible con el tamaño y la posición deseados     
     setResizable(false);
     setSize((int)(tableroVista.dimensionCasilla().getWidth() * 
                   columnas + MARGEN_HORIZONTAL), 
             (int)(tableroVista.dimensionCasilla().getHeight() * 
                   filas + MARGEN_VERTICAL));
         
-    pack();  // ajusta ventana y sus componentes
-    setLocationRelativeTo(null);  // centra en la pantalla    
+    pack();  // Ajusta ventana y sus componentes
+    setLocationRelativeTo(null);  // Centra en la pantalla    
     setVisible(true);
+  }
+
+  private void modificarAdyacentes(String string) {
+    mensajeAdyacentes.setText(string);
   }
 
   /**
@@ -209,12 +231,8 @@ public class PartidaVista extends JFrame implements ActionListener, PropertyChan
    * Crea la vista de las estadisticas
    * 
    */
-  /**
-   * Crea la vista de las estadisticas
-   * 
-   */
   public void creaEstadisticas(JPanel panel) {
-    JPanel panelEstadisticas = new JPanel(new GridLayout(4, 2)); // 4 filas, 2 columnas
+    JPanel panelEstadisticas = new JPanel(new GridLayout(4, 2));
 
     JLabel etiquetaPortaviones = new JLabel("Portaviones:");
     contadorPortaviones = new JLabel();
@@ -319,7 +337,6 @@ public class PartidaVista extends JFrame implements ActionListener, PropertyChan
     
       ponerTitulo(nombreFichero);
     }
-    
     return nombreFichero;
   }
 
@@ -382,6 +399,11 @@ public class PartidaVista extends JFrame implements ActionListener, PropertyChan
    */     
   public void inicializarVista() {
     tableroVista.inicializar();
+
+    contadorPortaviones.setText(String.valueOf(Partida.NUM_PORTAVIONES));
+    contadorCruceros.setText(String.valueOf(Partida.NUM_CRUCEROS));
+    contadorDestructores.setText(String.valueOf(Partida.NUM_DESTRUCTORES));
+    contadorFragatas.setText(String.valueOf(Partida.NUM_FRAGATAS));
   }
 
   /**
@@ -395,7 +417,11 @@ public class PartidaVista extends JFrame implements ActionListener, PropertyChan
         ponerIconoCasilla(posicion, tablero.estadoPosicion(posicion));
       }
     }
-
+    contadorPortaviones.setText(String.valueOf(tablero.cuantosBarcosQuedan(FactoriaBarcos.PORTAVIONES)));
+    contadorCruceros.setText(String.valueOf(tablero.cuantosBarcosQuedan(FactoriaBarcos.CRUCERO)));
+    contadorDestructores.setText(String.valueOf(tablero.cuantosBarcosQuedan(FactoriaBarcos.DESTRUCTOR)));
+    contadorFragatas.setText(String.valueOf(tablero.cuantosBarcosQuedan(FactoriaBarcos.FRAGATA)));
+    modificarAdyacentes("");
   }
   
   /**
@@ -406,43 +432,75 @@ public class PartidaVista extends JFrame implements ActionListener, PropertyChan
     oyenteVista.eventoProducido(evento, obj);    
   }
 
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-      if ("barcosRestantes".equals(evt.getPropertyName())) {
-        // Actualizar la interfaz de usuario para mostrar el nuevo número de barcos restantes
-        if(evt.getNewValue() != null){
-          actualizarEstadisticas((Map<String, Integer>) evt.getNewValue());
+  /**
+   * Recoge cambios en modelo
+   * 
+   */
+  @Override
+  public void propertyChange(PropertyChangeEvent evt) {
+    if(evt.getPropertyName().equals("HUNDIDO")){
+      incrementarContadores((String) evt.getNewValue(), -1);
+      System.out.println("Barco hundido: " + evt.getNewValue());
+    }
+    else if( evt.getPropertyName().equals("TOCADO") ){
+      Posicion posicion = (Posicion) evt.getNewValue();
+      ponerIconoCasilla((Posicion) evt.getNewValue(), Posicion.EstadoPosicion.TOCADA_BARCO);
+      modificarAdyacentes("");
+
+    }
+    else if( evt.getPropertyName().equals("AGUA") ){
+      ponerIconoCasilla((Posicion) evt.getNewValue(), Posicion.EstadoPosicion.TOCADA_AGUA);
+      modificarAdyacentes("");
+
+    }
+    else if(evt.getPropertyName().equals("ADYACENTES")){
+      modificarAdyacentes(MENSAJE_ADYACENTES);
+    }
+  }
+
+  /**
+   * Decrementa los contadores de barcos
+   * 
+   */
+  private void incrementarContadores(String nombreContador, int incremento) {
+    switch(nombreContador) {
+      case FactoriaBarcos.PORTAVIONES:
+        if (contadorPortaviones.getText() != "0"){
+          contadorPortaviones.setText(String.valueOf(Integer.parseInt(contadorPortaviones.getText()) + incremento));  
         }
-      }
+        break;
+      case FactoriaBarcos.CRUCERO:
+        contadorCruceros.setText(String.valueOf(Integer.parseInt(contadorCruceros.getText()) + incremento));
+        break;
+      case FactoriaBarcos.DESTRUCTOR:
+        contadorDestructores.setText(String.valueOf(Integer.parseInt(contadorDestructores.getText()) + incremento));
+        break;
+      case FactoriaBarcos.FRAGATA:
+        contadorFragatas.setText(String.valueOf(Integer.parseInt(contadorFragatas.getText()) + incremento));
+        break;
     }
+  }
 
-    private void incrementarContadores(){}
+  /**
+   * Habilita o deshabilita un evento
+   * 
+   */
+  public void habilitarEvento(OyenteVista.Evento evento, boolean habilitacion) { 
+    switch(evento) {
+        case GUARDAR:
+            menuFicheroGuardar.setEnabled(habilitacion);
+            botonGuardar.setEnabled(habilitacion);              
+            break;
 
-    public void actualizarEstadisticas(Map<String, Integer> barcosRestantes) {
-      estadisticas.setText("Barcos sin hundir\n" +
-                          "Portaviones      " + barcosRestantes.get(FactoriaBarcos.PORTAVIONES) +"\n" +
-                          "Cruceros           " + barcosRestantes.get(FactoriaBarcos.CRUCERO) + "\n" +
-                          "Destructores    " + barcosRestantes.get(FactoriaBarcos.DESTRUCTOR) + "\n" +
-                          "Fragatas           " + barcosRestantes.get(FactoriaBarcos.FRAGATA));
+        case GUARDAR_COMO:
+            menuFicheroGuardarComo.setEnabled(habilitacion);            
+            break;   
+            
+        case DISPARAR:
+            tableroVista.habilitar(habilitacion);
+            break;
     }
-
-    public void habilitarEvento(OyenteVista.Evento evento, boolean habilitacion) { 
-      switch(evento) {
-          case GUARDAR:
-              menuFicheroGuardar.setEnabled(habilitacion);
-              botonGuardar.setEnabled(habilitacion);              
-              break;
-  
-          case GUARDAR_COMO:
-              menuFicheroGuardarComo.setEnabled(habilitacion);            
-              break;   
-              
-          case DISPARAR:
-              tableroVista.habilitar(habilitacion);
-              break;
-      }
-    }
-    
+  }
 }
 
 

@@ -1,3 +1,16 @@
+/**
+ * Casilla.java
+ * 
+ * Versión 2 David Colás (funcionamiento) y Samuel Felipe (calidad) (05/2024)
+ * - Código jugar, cargar y guardar partida
+ *  
+ */
+
+/**
+ * Clase de la vista para las casillas del tablero
+ * 
+ */
+
 package hundirlaflota.vista;
 
 import hundirlaflota.control.*;
@@ -15,8 +28,8 @@ import javax.swing.border.BevelBorder;
  * Vista de una casilla del tablero en un JLabel
  * 
  */
-public class Casilla extends JLabel{
-    private Posicion posicion;
+public class Casilla extends JLabel {
+  private Posicion posicion;
   private PartidaVista partidaVista;
 
   /**
@@ -97,5 +110,4 @@ public class Casilla extends JLabel{
   public String toString() {
     return posicion.toString();
   }
-    
 }

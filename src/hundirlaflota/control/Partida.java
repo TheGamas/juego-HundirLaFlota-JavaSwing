@@ -1,15 +1,15 @@
 /**
  * Partida.java
  * 
- * Versión 1 David Colás (calidad) y Samuel Felipe (funcionamiento) (02/2024)
- * - Código para jugar, guardar y recuperar partida
+ * Versión 2 David Colás (funcionamiento) y Samuel Felipe (calidad) (05/2024)
+ * - Código jugar, cargar y guardar partida
  *  
  */
 
- /**
-  * Clase para la partida de hundir la flota
-  * 
-  */
+/**
+ * Clase para gestionar una partida de hundir la flota
+ * 
+ */
 
 package hundirlaflota.control;
 import java.io.BufferedWriter;
@@ -35,6 +35,11 @@ public class Partida {
     public static int EXITO_CARGAR = 5;
     public static final String DELIMITADOR_POSICIONES = ";";
 
+    public static int NUM_PORTAVIONES = 1;
+    public static int NUM_CRUCEROS = 1;
+    public static int NUM_DESTRUCTORES = 2;
+    public static int NUM_FRAGATAS = 3;
+
     public static String DELIMITADOR_BARCOS = "#";
 
   /**
@@ -49,6 +54,10 @@ public class Partida {
 
   }
 
+  /**
+   * Construye una partida a partir de un fichero
+   * 
+   */
   public Partida(PartidaVista vista, String nombreFichero) throws Exception {  
        
     recuperar(nombreFichero);
@@ -57,10 +66,6 @@ public class Partida {
     
     tablero.nuevoObservador(vista);
     vista.recuperarPartida(tablero);
-  }
-
-  public void enviarBarcosRestantes(){
-    tablero.enviarBarcosRestantes();
   }
   
   /**

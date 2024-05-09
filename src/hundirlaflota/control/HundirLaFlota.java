@@ -1,3 +1,16 @@
+/**
+ * HundirLaFlota.java
+ * 
+ * Versión 2 David Colás (funcionamiento) y Samuel Felipe (calidad) (05/2024)
+ * - Código para jugar, guardar y recuperar partida
+ *  
+ */
+
+/**
+ * Clase HundirLaFlota
+ * 
+ */
+
 package hundirlaflota.control;
 
 import java.io.FileNotFoundException;
@@ -7,6 +20,7 @@ import java.util.List;
 
 import hundirlaflota.modelo.FactoriaBarcos;
 import hundirlaflota.modelo.Posicion;
+import hundirlaflota.vista.DebugVista;
 import hundirlaflota.vista.PartidaVista;
 
 public class HundirLaFlota implements OyenteVista{
@@ -41,7 +55,10 @@ public class HundirLaFlota implements OyenteVista{
   }
 
   
-
+  /**
+   * Gestiona eventos producidos por la vista
+   * 
+   */
   @Override
   public void eventoProducido(Evento evento, Object obj) {
 
@@ -73,17 +90,17 @@ public class HundirLaFlota implements OyenteVista{
     }
   }
 
-
-
   /**
    * Escribe mensaje error
    * 
    */
   private void mensajeError(String mensaje, Exception e) {
     if (esModoDebug()) {
-      e.printStackTrace();             
+      DebugVista.devolverInstancia().mostrar(mensaje, e);             
     }
-    vista.mensajeDialogo(mensaje);    
+    else{
+      vista.mensajeDialogo(mensaje);    
+    }
   }
 
   
@@ -117,7 +134,6 @@ public class HundirLaFlota implements OyenteVista{
 
     partida = new Partida(vista, FILAS, COLUMNAS);
     colocarBarcos();
-    partida.enviarBarcosRestantes();
     vista.habilitarEvento(Evento.GUARDAR, false);
     vista.habilitarEvento(Evento.GUARDAR_COMO, false);   
     vista.habilitarEvento(Evento.DISPARAR, true);
@@ -133,7 +149,6 @@ public class HundirLaFlota implements OyenteVista{
      if (ficheroPartida != null) {
          try {
             partida = new Partida(vista, ficheroPartida);
-            partida.enviarBarcosRestantes();
 
             vista.habilitarEvento(Evento.GUARDAR, false); 
             vista.habilitarEvento(Evento.DISPARAR, true);
@@ -153,19 +168,9 @@ public class HundirLaFlota implements OyenteVista{
    * Pone ficha en tablero de juego
    * 
    */
-  private void disparar(Posicion posicion) { 
-    Posicion.EstadoPosicion resultado;
-    
+  private void disparar(Posicion posicion) {  
     if (partida != null){
-      resultado = partida.disparar(posicion);
-
-      if (resultado == Posicion.EstadoPosicion.TOCADA_BARCO ) {
-        vista.ponerIconoCasilla(posicion, Posicion.EstadoPosicion.TOCADA_BARCO);        
-      }
-      else if(resultado == Posicion.EstadoPosicion.NO_TOCADA || 
-              resultado == Posicion.EstadoPosicion.TOCADA_AGUA){
-        vista.ponerIconoCasilla(posicion, Posicion.EstadoPosicion.TOCADA_AGUA);        
-      }
+      partida.disparar(posicion);
     }
   }
 
@@ -220,13 +225,11 @@ public class HundirLaFlota implements OyenteVista{
     System.exit(0);    
   }
 
-
-
   /**
    *  Procesa argumentos de main
    * 
    */  
-  public static void procesarArgsMain(String[] args) {
+  private static void procesarArgsMain(String[] args) {
     List<String> argumentos = new ArrayList<String>(Arrays.asList(args));  
     
     if (argumentos.contains(ARG_DEBUG)) {
