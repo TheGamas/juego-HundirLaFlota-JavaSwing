@@ -65,6 +65,7 @@ public class Partida {
     guardada = true;
     
     tablero.nuevoObservador(vista);
+    vista.inicializarVista();
     vista.recuperarPartida(tablero);
   }
   

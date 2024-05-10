@@ -13,14 +13,20 @@
 
 package hundirlaflota.control;
 
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
+import java.util.Properties;
 
 import hundirlaflota.modelo.FactoriaBarcos;
 import hundirlaflota.modelo.Posicion;
+import hundirlaflota.modelo.Tupla;
 import hundirlaflota.vista.DebugVista;
+import hundirlaflota.vista.Localizacion;
 import hundirlaflota.vista.PartidaVista;
 
 public class HundirLaFlota implements OyenteVista{
@@ -30,17 +36,31 @@ public class HundirLaFlota implements OyenteVista{
   public static int FILAS = 10;
   public static int COLUMNAS = 10;
   public static int MAX_BARCOS = 7;
-  public static String VERSION = "Hundir la flota 2.0";
+  public static String VERSION = "2.0";
 
   private String ficheroPartida = null;
-
-
   private static boolean modoDebug = false;
 
   
 
   private PartidaVista vista;
+  private Localizacion local;
+
   private Partida partida;
+
+
+  /** Configuración */  
+  private static String FICHERO_CONFIG_WRONG = 
+          "Config file is wrong. Set default values";
+  private static String COMENTARIO_CONFIG = "country = ES|US, language = es|en";
+  
+  private Properties configuracion; 
+  private static final String FICHERO_CONFIG = "config.properties";
+  
+  public static final String LENGUAJE = "language";
+  private String lenguaje;  
+  public static final String PAIS = "country";
+  public String pais;
 
 
   /**
@@ -48,10 +68,45 @@ public class HundirLaFlota implements OyenteVista{
    * 
    */
   public HundirLaFlota(String args[]) {
-     procesarArgsMain(args);      
+    procesarArgsMain(args);      
      
-  
-     vista = PartidaVista.devolverInstancia(this, VERSION, FILAS, COLUMNAS);
+    leerConfiguracion();
+    local = Localizacion.devolverInstancia(lenguaje, pais);
+
+    vista = PartidaVista.devolverInstancia(this, VERSION, FILAS, COLUMNAS, lenguaje, pais);
+
+  }
+
+  /**
+   *  Lee configuración
+   * 
+   */ 
+  private void leerConfiguracion() {
+    // valores por defecto de localización;  
+    lenguaje = Locale.getDefault().getLanguage();
+    pais = Locale.getDefault().getCountry();
+    
+    try {
+      configuracion = new Properties();
+      configuracion.load(new FileInputStream(FICHERO_CONFIG));
+
+      lenguaje = configuracion.getProperty(LENGUAJE);
+      pais = configuracion.getProperty(PAIS);
+      // si falta lenguaje o país ponemos valores por defecto
+      if ((lenguaje == null) || (pais == null)) {
+        lenguaje = Locale.getDefault().getLanguage();
+        configuracion.setProperty(LENGUAJE, lenguaje);              
+        pais = Locale.getDefault().getCountry();
+        configuracion.setProperty(PAIS, pais);
+      }
+    } catch (Exception e) {
+      configuracion.setProperty(LENGUAJE, lenguaje);
+      configuracion.setProperty(PAIS, pais);
+
+      if (esModoDebug()) {
+        DebugVista.devolverInstancia().mostrar(FICHERO_CONFIG_WRONG, e);
+      }
+    }
   }
 
   
@@ -65,6 +120,7 @@ public class HundirLaFlota implements OyenteVista{
     switch(evento) {
       case NUEVA:
         nuevaPartida();
+        System.out.println("");
         break;
 
       case ABRIR:
@@ -81,6 +137,11 @@ public class HundirLaFlota implements OyenteVista{
 
       case GUARDAR_COMO:
         guardarPartidaComo(); 
+        break;
+
+      case CAMBIAR_LENGUAJE:
+      System.out.println("Cambiar lenguaje");
+        cambiarLenguaje((Tupla)obj);
         break;            
                       
       case DISPARAR:
@@ -101,6 +162,16 @@ public class HundirLaFlota implements OyenteVista{
     else{
       vista.mensajeDialogo(mensaje);    
     }
+  }
+
+  /**
+   * Cambia lenguaje
+   * 
+   */  
+  private void cambiarLenguaje(Tupla tupla) {
+    configuracion.setProperty(LENGUAJE, (String)tupla.a);
+    configuracion.setProperty(PAIS, (String)tupla.b);
+    salir();    
   }
 
   
@@ -132,7 +203,7 @@ public class HundirLaFlota implements OyenteVista{
     ficheroPartida = null;
     vista.ponerTitulo("");      
 
-    partida = new Partida(vista, FILAS, COLUMNAS);
+    partida = FactoriaPartidas.nuevaHundirLaFlota(vista);
     colocarBarcos();
     vista.habilitarEvento(Evento.GUARDAR, false);
     vista.habilitarEvento(Evento.GUARDAR_COMO, false);   
@@ -148,16 +219,16 @@ public class HundirLaFlota implements OyenteVista{
      ficheroPartida = vista.seleccionarFichero(PartidaVista.ABRIR_FICHERO);
      if (ficheroPartida != null) {
          try {
-            partida = new Partida(vista, ficheroPartida);
+            partida = FactoriaPartidas.abreHundirLaFlota(vista, ficheroPartida);
 
             vista.habilitarEvento(Evento.GUARDAR, false); 
             vista.habilitarEvento(Evento.DISPARAR, true);
-    
+            vista.ponerTitulo(ficheroPartida);    
                      
          } catch(FileNotFoundException e1) {
-           mensajeError(PartidaVista.FICHERO_NO_ENCONTRADO, e1);
+           mensajeError(Localizacion.FICHERO_PARTIDA_NO_ENCONTRADO, e1);
          } catch(Exception e2) {
-           mensajeError(PartidaVista.PARTIDA_NO_LEIDA, e2);
+           mensajeError(Localizacion.PARTIDA_NO_LEIDA, e2);
          }
      }
      else{
@@ -186,7 +257,7 @@ public class HundirLaFlota implements OyenteVista{
         partida.guardar(ficheroPartida);
         vista.habilitarEvento(Evento.GUARDAR, false);         
       } catch(Exception e) {
-        mensajeError(PartidaVista.PARTIDA_NO_GUARDADA, e);
+        mensajeError(Localizacion.PARTIDA_NO_GUARDADA, e);
       }
     }
   }
@@ -210,7 +281,7 @@ public class HundirLaFlota implements OyenteVista{
  private void guardarPartidaActual() {
    if ((partida != null) && (! partida.guardada())) {
      if (vista.mensajeConfirmacion(
-      PartidaVista.CONFIRMACION_GUARDAR) == PartidaVista.OPCION_SI) {               
+      local.devuelve(Localizacion.CONFIRMACION_GUARDAR)) == PartidaVista.OPCION_SI) {               
        guardarPartida();
      }
    }      
@@ -222,6 +293,16 @@ public class HundirLaFlota implements OyenteVista{
    */      
   private void salir() {
     guardarPartidaActual();
+    
+    // guarda configuración
+    try {
+      FileOutputStream fichero = new FileOutputStream(FICHERO_CONFIG);
+      configuracion.store(fichero, COMENTARIO_CONFIG);
+      fichero.close();
+    } catch(Exception e) {
+      mensajeError(Localizacion.CONFIGURACION_NO_GUARDADA, e);
+    }    
+    
     System.exit(0);    
   }
 

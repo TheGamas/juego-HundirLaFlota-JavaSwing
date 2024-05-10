@@ -85,15 +85,33 @@ public class DebugVista extends JFrame {
    * Muestra ventana debug
    * 
    */   
+  public void mostrar() {
+    setVisible(true);
+  }  
+
+  /**
+   * Muestra ventana debug
+   * 
+   */ 
+  public void mostrar(String mensaje) {
+    mostrar(mensaje, null);
+  }  
+
+  /**
+   * Muestra ventana debug con información de una excepción
+   * 
+   */   
   public void mostrar(String mensaje, Exception e) {
     texto.append(mensaje);
     texto.append("\n");
     
+    if (e != null) {
     // redirigimos traza exception a JTextArea
     StringWriter stackTrace = new StringWriter();
     e.printStackTrace(new PrintWriter(stackTrace));
     texto.append(stackTrace.toString());
     texto.append("\n"); 
+    }
     
     texto.setCaretPosition(0);
     

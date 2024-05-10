@@ -15,7 +15,7 @@ package hundirlaflota.control;
 
 public interface OyenteVista {
    public enum Evento { NUEVA, ABRIR, GUARDAR, GUARDAR_COMO, SALIR, 
-                        DISPARAR }
+                        DISPARAR, CAMBIAR_LENGUAJE }
   
    /**
     *  Llamado para notificar un evento de la interfaz de usuario
