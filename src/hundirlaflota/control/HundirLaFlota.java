@@ -22,10 +22,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 
-import hundirlaflota.modelo.FactoriaBarcos;
 import hundirlaflota.modelo.Posicion;
 import hundirlaflota.modelo.Tupla;
 import hundirlaflota.vista.DebugVista;
+import hundirlaflota.vista.FactoriaPartidasVista;
 import hundirlaflota.vista.Localizacion;
 import hundirlaflota.vista.PartidaVista;
 
@@ -71,9 +71,9 @@ public class HundirLaFlota implements OyenteVista{
     procesarArgsMain(args);      
      
     leerConfiguracion();
-    local = Localizacion.devolverInstancia(lenguaje, pais);
 
-    vista = PartidaVista.devolverInstancia(this, VERSION, FILAS, COLUMNAS, lenguaje, pais);
+    local = Localizacion.devolverInstancia(lenguaje, pais);
+    vista = FactoriaPartidasVista.HundirLaFlota(this, VERSION, lenguaje, pais);
 
   }
 
@@ -92,7 +92,7 @@ public class HundirLaFlota implements OyenteVista{
 
       lenguaje = configuracion.getProperty(LENGUAJE);
       pais = configuracion.getProperty(PAIS);
-      // si falta lenguaje o país ponemos valores por defecto
+
       if ((lenguaje == null) || (pais == null)) {
         lenguaje = Locale.getDefault().getLanguage();
         configuracion.setProperty(LENGUAJE, lenguaje);              
@@ -120,7 +120,6 @@ public class HundirLaFlota implements OyenteVista{
     switch(evento) {
       case NUEVA:
         nuevaPartida();
-        System.out.println("");
         break;
 
       case ABRIR:
@@ -140,7 +139,6 @@ public class HundirLaFlota implements OyenteVista{
         break;
 
       case CAMBIAR_LENGUAJE:
-      System.out.println("Cambiar lenguaje");
         cambiarLenguaje((Tupla)obj);
         break;            
                       
@@ -177,21 +175,11 @@ public class HundirLaFlota implements OyenteVista{
   
 
   /**
-   *  Indica si aplicación está en modo debug
+   *  Indica si la aplicación está en modo debug
    * 
    */ 
   public static boolean esModoDebug() {
     return modoDebug;
-  }
-
-  private void colocarBarcos(){
-    partida.colocarBarco(FactoriaBarcos.PORTAVIONES);
-    partida.colocarBarco(FactoriaBarcos.CRUCERO);
-    partida.colocarBarco(FactoriaBarcos.DESTRUCTOR);
-    partida.colocarBarco(FactoriaBarcos.DESTRUCTOR);
-    partida.colocarBarco(FactoriaBarcos.FRAGATA);
-    partida.colocarBarco(FactoriaBarcos.FRAGATA);
-    partida.colocarBarco(FactoriaBarcos.FRAGATA);
   }
 
   /**
@@ -201,10 +189,9 @@ public class HundirLaFlota implements OyenteVista{
   private void nuevaPartida() { 
     guardarPartidaActual();
     ficheroPartida = null;
-    vista.ponerTitulo("");      
+    vista.ponerTitulo(local.devuelve(Localizacion.TITULO));      
 
     partida = FactoriaPartidas.nuevaHundirLaFlota(vista);
-    colocarBarcos();
     vista.habilitarEvento(Evento.GUARDAR, false);
     vista.habilitarEvento(Evento.GUARDAR_COMO, false);   
     vista.habilitarEvento(Evento.DISPARAR, true);
@@ -228,7 +215,7 @@ public class HundirLaFlota implements OyenteVista{
          } catch(FileNotFoundException e1) {
            mensajeError(Localizacion.FICHERO_PARTIDA_NO_ENCONTRADO, e1);
          } catch(Exception e2) {
-           mensajeError(Localizacion.PARTIDA_NO_LEIDA, e2);
+           mensajeError(local.devuelve(Localizacion.PARTIDA_NO_LEIDA), e2);
          }
      }
      else{
@@ -279,7 +266,7 @@ public class HundirLaFlota implements OyenteVista{
   * 
   */        
  private void guardarPartidaActual() {
-   if ((partida != null) && (! partida.guardada())) {
+   if ((partida != null) && ( ! partida.guardada())) {
      if (vista.mensajeConfirmacion(
       local.devuelve(Localizacion.CONFIRMACION_GUARDAR)) == PartidaVista.OPCION_SI) {               
        guardarPartida();
@@ -290,7 +277,7 @@ public class HundirLaFlota implements OyenteVista{
   /**
    *  Salir de la aplicación
    * 
-   */      
+   */
   private void salir() {
     guardarPartidaActual();
     
@@ -309,7 +296,7 @@ public class HundirLaFlota implements OyenteVista{
   /**
    *  Procesa argumentos de main
    * 
-   */  
+   */
   private static void procesarArgsMain(String[] args) {
     List<String> argumentos = new ArrayList<String>(Arrays.asList(args));  
     

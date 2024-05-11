@@ -39,7 +39,7 @@ public class Barco {
     posiciones = new HashSet<Posicion>();
     while(scanner.hasNext()) {
       
-      if(scanner.hasNext(Partida.DELIMITADOR_POSICIONES)) {
+      if( scanner.hasNext(Partida.DELIMITADOR_POSICIONES )) {
         break;
       }
       posiciones.add(new Posicion(scanner));
@@ -66,12 +66,7 @@ public class Barco {
    * Devuelve falso en caso contrario
    */
   public Boolean estaOcupado(Posicion posicion) {
-    for(Posicion pos : posiciones) {
-        if(pos.equals(posicion)) {
-            return true;
-        }
-    }
-    return false;
+    return posiciones.contains(posicion);
   }
 
   /**

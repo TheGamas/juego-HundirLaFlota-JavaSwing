@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Scanner;
 
-import hundirlaflota.modelo.FactoriaBarcos;
 import hundirlaflota.modelo.Posicion;
 import hundirlaflota.modelo.Tablero;
 import hundirlaflota.vista.PartidaVista;
@@ -110,9 +109,7 @@ public class Partida {
    * Devuelve el resultado de la colocación
    */
   public int colocarBarco(String nombreBarco) {
-    int resultado = tablero.colocarBarco(nombreBarco);
-    
-    return resultado;
+    return tablero.colocarBarco(nombreBarco);
   }
 
   /**
@@ -121,25 +118,5 @@ public class Partida {
    */    
   boolean guardada() {
     return guardada;
-  }
-
-  /**
-   * Devuelve un String de la partida
-   * 
-   */
-  @Override
-  public String toString() {
-    String cadena = "";
-    cadena = cadena + HundirLaFlota.VERSION + "\n";
-    
-    cadena = cadena + tablero.toString();
-
-    cadena = cadena + "Quedan " + 
-    tablero.cuantosBarcosQuedan(FactoriaBarcos.PORTAVIONES) + " portavion/es, " + 
-    tablero.cuantosBarcosQuedan(FactoriaBarcos.CRUCERO) + " crucero/s, " + 
-    tablero.cuantosBarcosQuedan(FactoriaBarcos.DESTRUCTOR) + " destructor/es y " + 
-    tablero.cuantosBarcosQuedan(FactoriaBarcos.FRAGATA) + " fragata/s. \n";
-   
-    return cadena;
   }
 }

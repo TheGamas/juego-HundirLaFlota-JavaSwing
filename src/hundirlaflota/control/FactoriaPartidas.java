@@ -1,5 +1,19 @@
+
+/**
+ * FactoriaPartidas.java
+ * 
+ * Versión 2 David Colás (funcionamiento) y Samuel Felipe (calidad) (05/2024)
+ * - Código para jugar, guardar y recuperar partida
+ *  
+ */
+
+/**
+ * Clase FactoriaPartidas
+ * 
+ */
 package hundirlaflota.control;
 
+import hundirlaflota.modelo.FactoriaBarcos;
 import hundirlaflota.vista.PartidaVista;
 
 /**
@@ -12,7 +26,18 @@ public class FactoriaPartidas {
    * 
    */    
   public static Partida nuevaHundirLaFlota(PartidaVista vista) {
-    return new Partida(vista, 10, 10);    
+    Partida partida = new Partida(vista, 10, 10);
+
+    partida.colocarBarco(FactoriaBarcos.PORTAVIONES);
+    partida.colocarBarco(FactoriaBarcos.CRUCERO);
+    partida.colocarBarco(FactoriaBarcos.DESTRUCTOR);
+    partida.colocarBarco(FactoriaBarcos.DESTRUCTOR);
+    partida.colocarBarco(FactoriaBarcos.FRAGATA);
+    partida.colocarBarco(FactoriaBarcos.FRAGATA);
+    partida.colocarBarco(FactoriaBarcos.FRAGATA);
+    
+    return partida;
+        
   }
   
   /**

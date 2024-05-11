@@ -13,7 +13,7 @@
 
 package hundirlaflota.vista;
 
-import hundirlaflota.control.*;
+import hundirlaflota.control.OyenteVista;
 import hundirlaflota.modelo.Posicion;
 
 import java.awt.event.MouseAdapter;
@@ -99,15 +99,5 @@ public class Casilla extends JLabel {
    */    
   void ponerIcono(Icon icono) {
     setIcon(icono);
-  }
-  
-  
-  /**
-   * Sobreescribe toString
-   * 
-   */  
-  @Override
-  public String toString() {
-    return posicion.toString();
   }
 }

@@ -29,8 +29,6 @@ import java.util.Map;
 
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import org.w3c.dom.events.MouseEvent;
-
 import hundirlaflota.control.*;
 import hundirlaflota.control.OyenteVista.Evento;
 import hundirlaflota.modelo.FactoriaBarcos;
@@ -48,6 +46,8 @@ public class PartidaVista extends JFrame implements ActionListener, PropertyChan
   /* Ficheros de recursos */
   public static final String RUTA_RECURSOS = "/hundirlaflota/vista/recursos/";
   public static final String EXT_FICHERO_PARTIDA = ".txt";
+  public static final String ICONO_BARCO = "barco.jpg";
+  public static final String ICONO_JUGADA_FALLIDA = "cruz_cursor.png";
   
   /* Constantes para redimensionamiento */
   private static final int MARGEN_HORIZONTAL = 50;
@@ -68,7 +68,8 @@ public class PartidaVista extends JFrame implements ActionListener, PropertyChan
   private JButton botonGuardar;
   private JButton botonAcercaDe;
   private JButton botonSalir;
-  private JButton botonOpciones;
+  private JButton botonDebug;
+  private JMenu menuOpciones;
 
   private ImageIcon iconoBarco;
   private ImageIcon iconoJugadaFallida;
@@ -93,7 +94,7 @@ public class PartidaVista extends JFrame implements ActionListener, PropertyChan
    * eventos de la interfaz de usuario indicado
    * 
    */
-  public PartidaVista(OyenteVista oyenteVista, String version, 
+  private PartidaVista(OyenteVista oyenteVista, String version, 
                      int filas, int columnas, String lenguaje, String pais) { 
     super();
 
@@ -103,31 +104,63 @@ public class PartidaVista extends JFrame implements ActionListener, PropertyChan
     this.pais = pais;
 
     local = Localizacion.devolverInstancia(lenguaje, pais);
-    
     addWindowListener(new WindowAdapter() {
       @Override
       public void windowClosing(WindowEvent e) {
         oyenteVista.eventoProducido(OyenteVista.Evento.SALIR, null);
       }
     });
+    crearElementosVentanaPrincipal(filas, columnas);
     
-    setLayout(new BorderLayout());
+  }
+
+  /**
+   * Crea elementos de la ventana principal
+   * 
+   */
+  private void crearElementosVentanaPrincipal(int filas, int columnas){
+    setLayout(new BorderLayout()); 
+    creaBarraHerramientas();
+    crearPanelCentral(filas, columnas);
     
-    JMenuBar panelNorte = new JMenuBar();
-    panelNorte.setLayout(new FlowLayout(FlowLayout.LEFT));
+
+    menuFicheroGuardar = crearMenuItem(Localizacion.MENU_ITEM_GUARDAR, Localizacion.ATAJO_MENU_ITEM_GUARDAR_COMO);
     
-    // Creamos elementos
-    creaBarraHerramientas(panelNorte);
-    add(panelNorte, BorderLayout.NORTH);
-    
+    menuFicheroGuardarComo = crearMenuItem(Localizacion.MENU_ITEM_GUARDAR_COMO, 
+                                   Localizacion.ATAJO_MENU_ITEM_GUARDAR_COMO);
+    inicializarIconos();
+    ajustarElementos(filas, columnas);
+  }
+
+  /**
+   * Ajusta elementos de la ventana
+   * 
+   */
+  private void ajustarElementos(int filas, int columnas){
+    setResizable(false);
+    setSize((int)(tableroVista.dimensionCasilla().getWidth() * 
+                  columnas + MARGEN_HORIZONTAL), 
+            (int)(tableroVista.dimensionCasilla().getHeight() * 
+                  filas + MARGEN_VERTICAL));
+        
+    pack();  // Ajusta ventana y sus componentes
+    setLocationRelativeTo(null);  // Centra en la pantalla    
+    setVisible(true);
+  }
+
+  /**
+   * Crea panel central
+   * 
+   */
+  private void crearPanelCentral(int filTablero, int colTablero){
     JPanel panelCentral = new JPanel();
+
     panelCentral.setLayout(new GridLayout(1,2));
 
     JPanel panelIzquierdo = new JPanel();
 
-    creaTablero(panelIzquierdo, filas, columnas);
+    creaTablero(panelIzquierdo, filTablero, colTablero);
     panelCentral.add(panelIzquierdo, BorderLayout.CENTER);
-    
 
     JPanel panelDerecho = new JPanel();
     panelDerecho.setLayout(new BoxLayout(panelDerecho, BoxLayout.Y_AXIS));
@@ -141,39 +174,35 @@ public class PartidaVista extends JFrame implements ActionListener, PropertyChan
 
     panelCentral.add(panelDerecho);
     add(panelCentral);
-    
-    
-
-    
-    menuFicheroGuardar = 
-      new JMenuItem(Localizacion.MENU_ITEM_GUARDAR, Localizacion.ATAJO_MENU_ITEM_GUARDAR.charAt(0));
-    menuFicheroGuardar.setEnabled(false);
-    menuFicheroGuardar.addActionListener(this);
-    menuFicheroGuardar.setActionCommand(Localizacion.MENU_ITEM_GUARDAR);
-    
-    menuFicheroGuardarComo = 
-      new JMenuItem(Localizacion.MENU_ITEM_GUARDAR_COMO, 
-                    Localizacion.ATAJO_MENU_ITEM_GUARDAR_COMO.charAt(0));
-    menuFicheroGuardarComo.setEnabled(false);
-    menuFicheroGuardarComo.addActionListener(this);
-    menuFicheroGuardarComo.setActionCommand(Localizacion.MENU_ITEM_GUARDAR_COMO);
-
-    iconoBarco = new ImageIcon(getClass().getResource(RUTA_RECURSOS + "Barco.jpg"));
-    iconoJugadaFallida = new ImageIcon(getClass().getResource(RUTA_RECURSOS + "cruz_cursor.png"));
-    
-    
-    // Hacemos visible con el tamaño y la posición deseados     
-    setResizable(false);
-    setSize((int)(tableroVista.dimensionCasilla().getWidth() * 
-                  columnas + MARGEN_HORIZONTAL), 
-            (int)(tableroVista.dimensionCasilla().getHeight() * 
-                  filas + MARGEN_VERTICAL));
-        
-    pack();  // Ajusta ventana y sus componentes
-    setLocationRelativeTo(null);  // Centra en la pantalla    
-    setVisible(true);
   }
 
+  /**
+   * Inicializa iconos
+   * 
+   */
+  private void inicializarIconos(){
+    iconoBarco = new ImageIcon(getClass().getResource(RUTA_RECURSOS + ICONO_BARCO));
+    iconoJugadaFallida = new ImageIcon(
+      getClass().getResource(RUTA_RECURSOS + ICONO_JUGADA_FALLIDA));
+  }
+
+  /**
+   * Crea un menú con el nombre y atajo indicados
+   * 
+   */
+  private JMenuItem crearMenuItem( String nombreMenu, String atajoMenu){
+    JMenuItem menuBarra = new JMenuItem(nombreMenu, atajoMenu.charAt(0));
+    menuBarra.setEnabled(false);
+    menuBarra.addActionListener(this);
+    menuBarra.setActionCommand(nombreMenu);
+    return menuBarra;
+  }
+
+
+  /**
+   * Modifica mensaje de adyacentes
+   * 
+   */
   private void modificarAdyacentes(String string) {
     mensajeAdyacentes.setText(string);
   }
@@ -182,87 +211,112 @@ public class PartidaVista extends JFrame implements ActionListener, PropertyChan
    * Crea barra de herramientas
    * 
    */ 
-  private void creaBarraHerramientas(JMenuBar panelNorte) {
+  private void creaBarraHerramientas() {
 
-    botonNueva = new JButton(local.devuelve(Localizacion.BOTON_NUEVA));
-    botonNueva.setToolTipText(local.devuelve(Localizacion.MENU_ITEM_NUEVA));
-    botonNueva.addActionListener(this);
-    botonNueva.setActionCommand(Localizacion.MENU_ITEM_NUEVA);
-    panelNorte.add(botonNueva);
-
-    botonAbrir = new JButton(local.devuelve(Localizacion.BOTON_ABRIR));  
-    botonAbrir.setToolTipText(local.devuelve(Localizacion.MENU_ITEM_ABRIR));
-    botonAbrir.addActionListener(this);
-    botonAbrir.setActionCommand(Localizacion.MENU_ITEM_ABRIR);
-    panelNorte.add(botonAbrir); 
+    JMenuBar panelNorte = new JMenuBar();
+    panelNorte.setLayout(new FlowLayout(FlowLayout.LEFT));
     
-    botonGuardar = new JButton(local.devuelve(Localizacion.BOTON_GUARDAR));  
-    botonGuardar.setToolTipText(local.devuelve(Localizacion.MENU_ITEM_GUARDAR));
-    botonGuardar.addActionListener(this);
-    botonGuardar.setEnabled(false);
-    botonGuardar.setActionCommand(Localizacion.MENU_ITEM_GUARDAR);
+    botonNueva = crearBoton(local.devuelve(Localizacion.BOTON_NUEVA), 
+                            Localizacion.MENU_ITEM_NUEVA);
+    panelNorte.add(botonNueva);
+    botonAbrir = crearBoton(local.devuelve(Localizacion.BOTON_ABRIR), Localizacion.MENU_ITEM_ABRIR);
+    panelNorte.add(botonAbrir);
+    botonGuardar = crearBoton(local.devuelve(Localizacion.BOTON_GUARDAR), 
+                              Localizacion.MENU_ITEM_GUARDAR, false);
     panelNorte.add(botonGuardar);
-
-    botonAcercaDe = new JButton(local.devuelve(Localizacion.BOTON_ACERCA_DE));
-    botonAcercaDe.setToolTipText(local.devuelve(Localizacion.MENU_ITEM_ACERCA_DE));
-    botonAcercaDe.addActionListener(this);
-    botonAcercaDe.setActionCommand(Localizacion.MENU_ITEM_ACERCA_DE);
+    botonAcercaDe = crearBoton(local.devuelve(Localizacion.BOTON_ACERCA_DE), 
+                                Localizacion.MENU_ITEM_ACERCA_DE);
     panelNorte.add(botonAcercaDe);
+    menuOpciones = crearOpciones(panelNorte);
 
-    JMenu menuOpciones = 
-      new JMenu(local.devuelve(Localizacion.MENU_ITEM_OPCIONES));
-    menuOpciones.addActionListener(this);
+    if (HundirLaFlota.esModoDebug()) {
+      botonDebug = crearBoton(local.devuelve(Localizacion.BOTON_DEBUG), 
+                              Localizacion.MENU_ITEM_DEBUG);
+      panelNorte.add(botonDebug);      
+    }
+
+    botonSalir = crearBoton(local.devuelve(Localizacion.BOTON_SALIR), Localizacion.MENU_ITEM_SALIR);
+    panelNorte.add(botonSalir);
+
+    add(panelNorte, BorderLayout.NORTH);
+  }
+
+  /**
+   * Crea un boton habilitado con la etiqueta y el menú item indicados
+   * 
+   */
+  private JButton crearBoton(String etiqueta, String menu_item){
+    return crearBoton(etiqueta, menu_item, true);
+
+  }
+
+  /**
+   * Crea un boton con la etiqueta y el menú item indicados
+   * 
+   */
+  private JButton crearBoton(String etiqueta, String menu_item, boolean eneabled){
+    JButton boton = new JButton(etiqueta);
+    boton.setToolTipText(local.devuelve(menu_item));
+    boton.addActionListener(this);
+    boton.setEnabled(eneabled);
+    boton.setActionCommand(menu_item);
+    return boton;
+  }
+
+  /**
+   * Crea menú de opciones
+   * 
+   */
+  private JMenu crearOpciones(JMenuBar panelNorte){
+    JMenu menuOpciones = crearMenu(Localizacion.MENU_ITEM_OPCIONES);
     panelNorte.add(menuOpciones);    
     
-    JMenu menuLenguaje = 
-      new JMenu(local.devuelve(Localizacion.MENU_ITEM_LENGUAJE));
-    menuLenguaje.addActionListener(this);
+    JMenu menuLenguaje = crearMenu(Localizacion.MENU_ITEM_LENGUAJE);
     menuLenguaje.setActionCommand(Localizacion.MENU_ITEM_LENGUAJE);
     menuOpciones.add(menuLenguaje);    
 
     ButtonGroup grupoBotonesLenguaje = new ButtonGroup();
 
-    radioBotonEspanol = new JRadioButtonMenuItem(
-            local.devuelve(Localizacion.MENU_ITEM_ESPANOL));
- 
-    radioBotonEspanol.addActionListener(this);    
-    radioBotonEspanol.setActionCommand(Localizacion.MENU_ITEM_ESPANOL);    
+    radioBotonEspanol = crearBotonMenuItem(Localizacion.MENU_ITEM_ESPANOL);
     grupoBotonesLenguaje.add(radioBotonEspanol);
     menuLenguaje.add(radioBotonEspanol);
     botonesLenguaje.put(Localizacion.LENGUAJE_ESPANOL, radioBotonEspanol);
 
-    radioBotonIngles = new JRadioButtonMenuItem(
-            local.devuelve(Localizacion.MENU_ITEM_INGLES));
-    radioBotonIngles.addActionListener(this);    
-    radioBotonIngles.setActionCommand(Localizacion.MENU_ITEM_INGLES);  
+    radioBotonIngles = crearBotonMenuItem(Localizacion.MENU_ITEM_INGLES);
     grupoBotonesLenguaje.add(radioBotonIngles);
     menuLenguaje.add(radioBotonIngles);
     botonesLenguaje.put(Localizacion.LENGUAJE_INGLES, radioBotonIngles);
 
     // seleccionamos botón según lenguaje configurado
     botonesLenguaje.get(lenguaje).setSelected(true);
+    return menuOpciones;
+  }
 
-    JMenu menuAyuda = new JMenu(local.devuelve(Localizacion.MENU_AYUDA));
+  /**
+   * Crea menú
+   * 
+   */
+  private JMenu crearMenu(String etiqueta){
+    JMenu menu = new JMenu(local.devuelve(etiqueta));
+    menu.addActionListener(this);
+    return menu;
+  }
 
-    if (HundirLaFlota.esModoDebug()) {
-      JMenuItem menuDebug = 
-        new JMenuItem(local.devuelve(Localizacion.MENU_ITEM_DEBUG), 
-                      local.devuelve(Localizacion.ATAJO_ITEM_DEBUG).charAt(0));
-      menuDebug.addActionListener(this);
-      menuDebug.setActionCommand(Localizacion.MENU_ITEM_DEBUG);
-      menuAyuda.add(menuDebug);  
-      menuAyuda.addSeparator(); 
-    }
+  /**
+   * Crea boton menú ítem
+   * 
+   */
+  private JRadioButtonMenuItem crearBotonMenuItem(String etiqueta) {
+    JRadioButtonMenuItem radioBotonItem = new JRadioButtonMenuItem(
+            local.devuelve(etiqueta));
+ 
+    radioBotonItem.addActionListener(this);    
+    radioBotonItem.setActionCommand(etiqueta);    
+    
+    return radioBotonItem;
+  }
 
 
-    botonSalir = new JButton(local.devuelve(Localizacion.BOTON_SALIR));
-    botonSalir.setToolTipText(local.devuelve(Localizacion.MENU_ITEM_SALIR));
-    botonSalir.addActionListener(this);
-    botonSalir.setActionCommand(Localizacion.MENU_ITEM_SALIR);
-    panelNorte.add(botonSalir);
-
-
-  }  
   
   /**
    * Crea la vista del tablero
@@ -280,28 +334,32 @@ public class PartidaVista extends JFrame implements ActionListener, PropertyChan
    */
   private void creaEstadisticas(JPanel panel) {
     JPanel panelEstadisticas = new JPanel(new GridLayout(4, 2));
-
-    JLabel etiquetaPortaviones = new JLabel(local.devuelve(Localizacion.ETIQUETA_PORTAVIONES) + ": ");
+    
     contadorPortaviones = new JLabel();
-    panelEstadisticas.add(etiquetaPortaviones);
-    panelEstadisticas.add(contadorPortaviones);
+    crearLineaEstadisticas(Localizacion.ETIQUETA_PORTAVIONES, contadorPortaviones,
+    panelEstadisticas);
 
-    JLabel etiquetaCruceros = new JLabel(local.devuelve(Localizacion.ETIQUETA_CRUCERO) + ": ");
     contadorCruceros = new JLabel();
-    panelEstadisticas.add(etiquetaCruceros);
-    panelEstadisticas.add(contadorCruceros);
+    crearLineaEstadisticas(Localizacion.ETIQUETA_CRUCERO, contadorCruceros, panelEstadisticas);
 
-    JLabel etiquetaDestructor = new JLabel(local.devuelve(Localizacion.ETIQUETA_DESTRUCTOR) + ": ");
     contadorDestructores = new JLabel();
-    panelEstadisticas.add(etiquetaDestructor);
-    panelEstadisticas.add(contadorDestructores);
+    crearLineaEstadisticas(Localizacion.ETIQUETA_DESTRUCTOR, contadorDestructores, panelEstadisticas);
 
-    JLabel etiquetaFragata = new JLabel(local.devuelve(Localizacion.ETIQUETA_FRAGATA) + ": ");
     contadorFragatas = new JLabel();
-    panelEstadisticas.add(etiquetaFragata);
-    panelEstadisticas.add(contadorFragatas);
+    crearLineaEstadisticas(Localizacion.ETIQUETA_FRAGATA, contadorFragatas, panelEstadisticas);
 
     panel.add(panelEstadisticas);
+  }
+
+  /**
+   * Crea una línea de estadísticas
+   * 
+   */
+  private void crearLineaEstadisticas(String etiqueta, JLabel contador, JPanel panel){
+    JLabel nombre = new JLabel(local.devuelve(etiqueta) + ": ");
+    panel.add(nombre);
+    panel.add(contador);
+
   }
 
   /**
@@ -324,46 +382,46 @@ public class PartidaVista extends JFrame implements ActionListener, PropertyChan
   @Override
   public void actionPerformed(ActionEvent e) {
     switch(e.getActionCommand()) {
-        case Localizacion.MENU_ITEM_NUEVA:
-          oyenteVista.eventoProducido(OyenteVista.Evento.NUEVA, null);
-          tableroVista.habilitar(true);
-          inicializarVista(); 
-          break;
+      case Localizacion.MENU_ITEM_NUEVA:
+        oyenteVista.eventoProducido(OyenteVista.Evento.NUEVA, null);
+        tableroVista.habilitar(true);
+        inicializarVista(); 
+        break;
 
-        case Localizacion.MENU_ITEM_ABRIR:           
-          oyenteVista.eventoProducido(OyenteVista.Evento.ABRIR, null);
-          tableroVista.habilitar(true);
-          break;
-           
-        case Localizacion.MENU_ITEM_GUARDAR:
-          oyenteVista.eventoProducido(OyenteVista.Evento.GUARDAR, null);
-          break;           
-             
-        case Localizacion.MENU_ITEM_GUARDAR_COMO:
-          oyenteVista.eventoProducido(OyenteVista.Evento.GUARDAR_COMO, null);
-          break; 
-        case Localizacion.MENU_ITEM_ESPANOL: 
-          cambiarLenguaje(Localizacion.LENGUAJE_ESPANOL, Localizacion.PAIS_ESPANA);           
-          break;           
+      case Localizacion.MENU_ITEM_ABRIR:           
+        oyenteVista.eventoProducido(OyenteVista.Evento.ABRIR, null);
+        tableroVista.habilitar(true);
+        break;
+          
+      case Localizacion.MENU_ITEM_GUARDAR:
+        oyenteVista.eventoProducido(OyenteVista.Evento.GUARDAR, null);
+        break;           
+            
+      case Localizacion.MENU_ITEM_GUARDAR_COMO:
+        oyenteVista.eventoProducido(OyenteVista.Evento.GUARDAR_COMO, null);
+        break; 
+      case Localizacion.MENU_ITEM_ESPANOL: 
+        cambiarLenguaje(Localizacion.LENGUAJE_ESPANOL, Localizacion.PAIS_ESPANA);           
+        break;           
 
-        case Localizacion.MENU_ITEM_INGLES:
-          cambiarLenguaje(Localizacion.LENGUAJE_INGLES, Localizacion.PAIS_USA);        
-          break;            
-           
-        case Localizacion.MENU_ITEM_SALIR:
-          oyenteVista.eventoProducido(OyenteVista.Evento.SALIR, null);
-          break;
-         
-        case Localizacion.MENU_ITEM_DEBUG:
-           DebugVista.devolverInstancia().mostrar();
-           break;
+      case Localizacion.MENU_ITEM_INGLES:
+        cambiarLenguaje(Localizacion.LENGUAJE_INGLES, Localizacion.PAIS_USA);        
+        break;            
+          
+      case Localizacion.MENU_ITEM_SALIR:
+        oyenteVista.eventoProducido(OyenteVista.Evento.SALIR, null);
+        break;
         
-        case Localizacion.MENU_ITEM_ACERCA_DE:
-          JOptionPane.showMessageDialog(this,
-            local.devuelve(Localizacion.TITULO) + " " + version + "\n", 
-            local.devuelve(Localizacion.MENU_ITEM_ACERCA_DE), 
-            JOptionPane.INFORMATION_MESSAGE,  icono);   
+      case Localizacion.MENU_ITEM_DEBUG:
+          DebugVista.devolverInstancia().mostrar();
           break;
+      
+      case Localizacion.MENU_ITEM_ACERCA_DE:
+        JOptionPane.showMessageDialog(this,
+          local.devuelve(Localizacion.TITULO) + " " + version + "\n", 
+          local.devuelve(Localizacion.MENU_ITEM_ACERCA_DE), 
+          JOptionPane.INFORMATION_MESSAGE,  icono);   
+        break;
     }
   }
 
@@ -373,7 +431,7 @@ public class PartidaVista extends JFrame implements ActionListener, PropertyChan
    */   
   private void cambiarLenguaje(String nuevoLenguaje, String nuevoPais) {
     // si opción es distinta de la actual preguntamos cambiar  
-    if (! lenguaje.equals(nuevoLenguaje)) { 
+    if ( ! lenguaje.equals(nuevoLenguaje)) { 
       // si cambiamos modificamos configuración y salimos  
       if (mensajeConfirmacion(local.devuelve(Localizacion.CONFIRMACION_LENGUAJE)) == OPCION_SI) {               
         oyenteVista.eventoProducido(OyenteVista.Evento.CAMBIAR_LENGUAJE, 
@@ -403,7 +461,8 @@ public class PartidaVista extends JFrame implements ActionListener, PropertyChan
     
     if (operacion == ABRIR_FICHERO) {
       resultado = dialogoSeleccionar.showOpenDialog(this);
-    } else {
+    } 
+    else {
       resultado = dialogoSeleccionar.showSaveDialog(this);
     }
     
@@ -433,9 +492,9 @@ public class PartidaVista extends JFrame implements ActionListener, PropertyChan
     }     
     
     if (HundirLaFlota.esModoDebug()) {
-      titulo.insert(0, "[Debug] ");
+      titulo.insert(0, DebugVista.TITULO);
     }
-    
+
     this.setTitle(titulo.toString());
  }
 
@@ -504,11 +563,19 @@ public class PartidaVista extends JFrame implements ActionListener, PropertyChan
         ponerIconoCasilla(posicion, tablero.estadoPosicion(posicion));
       }
     }
+    recuperarEstadisticas(tablero);
+    modificarAdyacentes("");
+  }
+
+  /**
+   * Recupera estadisticas de barcos
+   * 
+   */
+  private void recuperarEstadisticas(Tablero tablero){
     contadorPortaviones.setText(String.valueOf(tablero.cuantosBarcosQuedan(FactoriaBarcos.PORTAVIONES)));
     contadorCruceros.setText(String.valueOf(tablero.cuantosBarcosQuedan(FactoriaBarcos.CRUCERO)));
     contadorDestructores.setText(String.valueOf(tablero.cuantosBarcosQuedan(FactoriaBarcos.DESTRUCTOR)));
     contadorFragatas.setText(String.valueOf(tablero.cuantosBarcosQuedan(FactoriaBarcos.FRAGATA)));
-    modificarAdyacentes("");
   }
   
   /**
@@ -525,22 +592,20 @@ public class PartidaVista extends JFrame implements ActionListener, PropertyChan
    */
   @Override
   public void propertyChange(PropertyChangeEvent evt) {
-    if(evt.getPropertyName().equals("HUNDIDO")){
+    if(evt.getPropertyName().equals(Tablero.MENSAJE_HUNDIDO)){
       incrementarContadores((String) evt.getNewValue(), -1);
-      System.out.println("Barco hundido: " + evt.getNewValue());
     }
-    else if( evt.getPropertyName().equals("TOCADO") ){
-      Posicion posicion = (Posicion) evt.getNewValue();
+    else if( evt.getPropertyName().equals(Tablero.MENSAJE_TOCADO) ){
       ponerIconoCasilla((Posicion) evt.getNewValue(), Posicion.EstadoPosicion.TOCADA_BARCO);
       modificarAdyacentes("");
 
     }
-    else if( evt.getPropertyName().equals("AGUA") ){
+    else if( evt.getPropertyName().equals(Tablero.MENSAJE_AGUA) ){
       ponerIconoCasilla((Posicion) evt.getNewValue(), Posicion.EstadoPosicion.TOCADA_AGUA);
       modificarAdyacentes("");
 
     }
-    else if(evt.getPropertyName().equals("ADYACENTES")){
+    else if(evt.getPropertyName().equals(Tablero.MENSAJE_ADYACENTES)){
       modificarAdyacentes(local.devuelve((Localizacion.MENSAJE_ADYACENTES)));
     }
   }
@@ -553,19 +618,22 @@ public class PartidaVista extends JFrame implements ActionListener, PropertyChan
     switch(nombreContador) {
       case FactoriaBarcos.PORTAVIONES:
         
-        contadorPortaviones.setText(String.valueOf(Integer.parseInt(contadorPortaviones.getText()) + incremento));  
+        contadorPortaviones.setText(
+          String.valueOf(Integer.parseInt(contadorPortaviones.getText()) + incremento));  
         break;
       case FactoriaBarcos.CRUCERO:
-        contadorCruceros.setText(String.valueOf(Integer.parseInt(contadorCruceros.getText()) + incremento));
+        contadorCruceros.setText(
+          String.valueOf(Integer.parseInt(contadorCruceros.getText()) + incremento));
         break;
       case FactoriaBarcos.DESTRUCTOR:
-        contadorDestructores.setText(String.valueOf(Integer.parseInt(contadorDestructores.getText()) + incremento));
+        contadorDestructores.setText(
+          String.valueOf(Integer.parseInt(contadorDestructores.getText()) + incremento));
         break;
       case FactoriaBarcos.FRAGATA:
-        contadorFragatas.setText(String.valueOf(Integer.parseInt(contadorFragatas.getText()) + incremento));
+        contadorFragatas.setText(
+          String.valueOf(Integer.parseInt(contadorFragatas.getText()) + incremento));
         break;
     }
-    pack();
   }
 
   /**
@@ -574,18 +642,18 @@ public class PartidaVista extends JFrame implements ActionListener, PropertyChan
    */
   public void habilitarEvento(OyenteVista.Evento evento, boolean habilitacion) { 
     switch(evento) {
-        case GUARDAR:
-            menuFicheroGuardar.setEnabled(habilitacion);
-            botonGuardar.setEnabled(habilitacion);              
-            break;
+      case GUARDAR:
+        menuFicheroGuardar.setEnabled(habilitacion);
+        botonGuardar.setEnabled(habilitacion);              
+        break;
 
-        case GUARDAR_COMO:
-            menuFicheroGuardarComo.setEnabled(habilitacion);            
-            break;   
-            
-        case DISPARAR:
-            tableroVista.habilitar(habilitacion);
-            break;
+      case GUARDAR_COMO:
+        menuFicheroGuardarComo.setEnabled(habilitacion);            
+        break;   
+          
+      case DISPARAR:
+        tableroVista.habilitar(habilitacion);
+        break;
     }
   }
 }

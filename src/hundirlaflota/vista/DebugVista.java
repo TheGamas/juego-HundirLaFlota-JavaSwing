@@ -28,9 +28,8 @@ public class DebugVista extends JFrame {
   private static final int FILAS = 20;
   private static final int COLUMNAS = 80;
   
-  /** Identificadores de textos dependientes del idioma */          
-  private static final String TITULO = "[Debug] ";
-  private static final String BOTON_ACEPTAR = "Aceptar";  
+  public static final String TITULO = "[Debug] ";
+  private static final String BOTON_ACEPTAR = "OK";  
   
   /**
    * Construye ventana

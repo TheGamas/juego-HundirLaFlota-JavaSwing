@@ -34,18 +34,14 @@ public class Tablero {
     private int filas;
     private int columnas;
     private Set<Posicion> jugadasFallidas;
-      private PropertyChangeSupport observadores;
+    private PropertyChangeSupport observadores;
 
+    public static final String MENSAJE_HUNDIDO = "HUNDIDO";
+    public static final String MENSAJE_TOCADO = "TOCADO";
+    public static final String MENSAJE_AGUA = "AGUA";
+    public static final String MENSAJE_ADYACENTES = "ADYACENTES";
 
-    static final int HORIZONTAL = 0;
-    static final int VERTICAL = 1;
-    
-    //Disparos
-
-    static final int INTENTOS_MAX_COLOCAR = 20;
-    static final char PRIMERA_LETRA = 'A';
-
-    
+    private static final int INTENTOS_MAX_COLOCAR = 20;
 
   /**
    * Construye el tablero
@@ -91,22 +87,23 @@ public class Tablero {
     posicion.disparar();
     boolean estabaHundido = false;
     String nombre = null;
+
     for(Entry<String, Set<Barco>> barcosTipo : barcos.entrySet()) {
       nombre = barcosTipo.getKey();
       for(Barco barco : barcosTipo.getValue()) {
         estabaHundido = barco.estaHundido();
         if(barco.disparar(posicion)) {
           if (barco.estaHundido() && ! estabaHundido){
-            observadores.firePropertyChange("HUNDIDO", null, nombre);
+            observadores.firePropertyChange(MENSAJE_HUNDIDO, null, nombre);
           }
-          observadores.firePropertyChange("TOCADO", null, posicion);
+          observadores.firePropertyChange(MENSAJE_TOCADO, null, posicion);
           return Posicion.EstadoPosicion.TOCADA_BARCO;
         }
       }
-      observadores.firePropertyChange("AGUA", null, posicion);
+      observadores.firePropertyChange(MENSAJE_AGUA, null, posicion);
       jugadasFallidas.add(posicion);
       if(hayBarcosAdyacentes(posicion)) {
-        observadores.firePropertyChange("ADYACENTES", null, null);
+        observadores.firePropertyChange(MENSAJE_ADYACENTES, null, null);
       }
     } 
   return Posicion.EstadoPosicion.NO_TOCADA;
@@ -251,9 +248,9 @@ public class Tablero {
       return Partida.BARCO_DEMASIADO_GRANDE;
     }
 
-    Set<Barco> barcosTipo = barcos.getOrDefault(tipoBarco, new HashSet<>());
-    barcosTipo.add(barco);
-    barcos.put(tipoBarco, barcosTipo);
+    Set<Barco> barcosDeUnTipo = barcos.getOrDefault(tipoBarco, new HashSet<>());
+    barcosDeUnTipo.add(barco);
+    barcos.put(tipoBarco, barcosDeUnTipo);
 
     return Partida.EXITO_COLOCAR;
   }
@@ -263,7 +260,7 @@ public class Tablero {
    *
    * Devuelve falso en caso contrario
    */
-  public Boolean esAgua(Posicion posicion) {
+  private Boolean esAgua(Posicion posicion) {
     
     for(Posicion pos : jugadasFallidas) {
       if(pos.equals(posicion)) {
@@ -363,7 +360,6 @@ public class Tablero {
     }
     return Partida.EXITO_CARGAR;
   }
-
   
   /**
    * Carga las jugadas fallidas desde un fichero
@@ -377,31 +373,5 @@ public class Tablero {
     while (scanner.hasNext()) {
       jugadasFallidas.add(new Posicion(scanner));
     }
-  }
-   /**
-    * Representación del tablero
-    * 
-    */
-  public String toString() {
-    String tablero = "";
-    for(int fila = 0; fila < filas; fila++) {
-      for(int columna = 0; columna < columnas; columna++) {
-        Posicion posicion = new Posicion(columna, fila);
-        if(estaTocada(posicion)) {
-          tablero += "X";
-        }
-        if(estaOcupada(posicion)) {
-          tablero += "B";
-        }
-        else if(esAgua(posicion)) {
-          tablero += "O";
-        }
-        else {
-          tablero += " ";
-        }
-      }
-      tablero += "\n";
-    }
-    return tablero;
   }
 }

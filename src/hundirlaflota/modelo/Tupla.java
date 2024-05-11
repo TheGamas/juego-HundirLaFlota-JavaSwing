@@ -1,4 +1,11 @@
 
+/**
+ * Tupla.java
+ * 
+ * Versión 2 David Colás (funcionamiento) y Samuel Felipe (calidad) (05/2024)
+ * - Código jugar, cargar y guardar partida
+ *  
+ */
 package hundirlaflota.modelo;
 
 /**

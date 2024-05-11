@@ -23,7 +23,8 @@ import javax.swing.SwingConstants;
 import hundirlaflota.modelo.Posicion;
 
 /**
- * Vista de una posicion a partir de un JLabel
+ * Vista Swing del tablero
+ * 
  */
 public class TableroVista extends JPanel {
   private static final int ALTURA_FILA = 40;
@@ -55,10 +56,8 @@ public class TableroVista extends JPanel {
     setLayout(new GridLayout(filas + 1, columnas + 1));
     casillas = new Casilla[filas][columnas];    
 
-    // Añadir espacio vacío en la esquina superior izquierda
     add(new JLabel(""));
 
-    // Añadir letras para las columnas
     for (int col = 0; col < columnas; col++) {
         JLabel letra = new JLabel(Character.toString((char) ('A' + col)), SwingConstants.CENTER);
         letra.setBorder(null);
@@ -66,7 +65,6 @@ public class TableroVista extends JPanel {
     }
 
     for(int fil = 0; fil < filas; fil++) {
-        // Añadir letra para la fila
         JLabel letra = new JLabel(Character.toString((char) ('A' + fil)), SwingConstants.CENTER);
         letra.setBorder(null);
         add(letra);
