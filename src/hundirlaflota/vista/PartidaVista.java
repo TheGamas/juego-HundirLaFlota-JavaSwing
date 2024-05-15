@@ -46,7 +46,7 @@ public class PartidaVista extends JFrame implements ActionListener, PropertyChan
   /* Ficheros de recursos */
   public static final String RUTA_RECURSOS = "/hundirlaflota/vista/recursos/";
   public static final String EXT_FICHERO_PARTIDA = ".txt";
-  public static final String ICONO_BARCO = "barco.jpg";
+  public static final String ICONO_BARCO = "Barco.jpg";
   public static final String ICONO_JUGADA_FALLIDA = "cruz_cursor.png";
   
   /* Constantes para redimensionamiento */
@@ -124,7 +124,8 @@ public class PartidaVista extends JFrame implements ActionListener, PropertyChan
     crearPanelCentral(filas, columnas);
     
 
-    menuFicheroGuardar = crearMenuItem(Localizacion.MENU_ITEM_GUARDAR, Localizacion.ATAJO_MENU_ITEM_GUARDAR_COMO);
+    menuFicheroGuardar = crearMenuItem(Localizacion.MENU_ITEM_GUARDAR,
+      Localizacion.ATAJO_MENU_ITEM_GUARDAR_COMO);
     
     menuFicheroGuardarComo = crearMenuItem(Localizacion.MENU_ITEM_GUARDAR_COMO, 
                                    Localizacion.ATAJO_MENU_ITEM_GUARDAR_COMO);
@@ -185,6 +186,7 @@ public class PartidaVista extends JFrame implements ActionListener, PropertyChan
     iconoJugadaFallida = new ImageIcon(
       getClass().getResource(RUTA_RECURSOS + ICONO_JUGADA_FALLIDA));
   }
+  
 
   /**
    * Crea un menú con el nombre y atajo indicados
@@ -219,7 +221,8 @@ public class PartidaVista extends JFrame implements ActionListener, PropertyChan
     botonNueva = crearBoton(local.devuelve(Localizacion.BOTON_NUEVA), 
                             Localizacion.MENU_ITEM_NUEVA);
     panelNorte.add(botonNueva);
-    botonAbrir = crearBoton(local.devuelve(Localizacion.BOTON_ABRIR), Localizacion.MENU_ITEM_ABRIR);
+    botonAbrir = crearBoton(local.devuelve(Localizacion.BOTON_ABRIR), 
+                            Localizacion.MENU_ITEM_ABRIR);
     panelNorte.add(botonAbrir);
     botonGuardar = crearBoton(local.devuelve(Localizacion.BOTON_GUARDAR), 
                               Localizacion.MENU_ITEM_GUARDAR, false);
@@ -235,7 +238,8 @@ public class PartidaVista extends JFrame implements ActionListener, PropertyChan
       panelNorte.add(botonDebug);      
     }
 
-    botonSalir = crearBoton(local.devuelve(Localizacion.BOTON_SALIR), Localizacion.MENU_ITEM_SALIR);
+    botonSalir = crearBoton(local.devuelve(Localizacion.BOTON_SALIR), 
+                            Localizacion.MENU_ITEM_SALIR);
     panelNorte.add(botonSalir);
 
     add(panelNorte, BorderLayout.NORTH);
@@ -337,16 +341,19 @@ public class PartidaVista extends JFrame implements ActionListener, PropertyChan
     
     contadorPortaviones = new JLabel();
     crearLineaEstadisticas(Localizacion.ETIQUETA_PORTAVIONES, contadorPortaviones,
-    panelEstadisticas);
+      panelEstadisticas);
 
     contadorCruceros = new JLabel();
-    crearLineaEstadisticas(Localizacion.ETIQUETA_CRUCERO, contadorCruceros, panelEstadisticas);
+    crearLineaEstadisticas(Localizacion.ETIQUETA_CRUCERO, contadorCruceros, 
+      panelEstadisticas);
 
     contadorDestructores = new JLabel();
-    crearLineaEstadisticas(Localizacion.ETIQUETA_DESTRUCTOR, contadorDestructores, panelEstadisticas);
+    crearLineaEstadisticas(Localizacion.ETIQUETA_DESTRUCTOR, contadorDestructores,
+      panelEstadisticas);
 
     contadorFragatas = new JLabel();
-    crearLineaEstadisticas(Localizacion.ETIQUETA_FRAGATA, contadorFragatas, panelEstadisticas);
+    crearLineaEstadisticas(Localizacion.ETIQUETA_FRAGATA, contadorFragatas, 
+      panelEstadisticas);
 
     panel.add(panelEstadisticas);
   }
@@ -433,7 +440,8 @@ public class PartidaVista extends JFrame implements ActionListener, PropertyChan
     // si opción es distinta de la actual preguntamos cambiar  
     if ( ! lenguaje.equals(nuevoLenguaje)) { 
       // si cambiamos modificamos configuración y salimos  
-      if (mensajeConfirmacion(local.devuelve(Localizacion.CONFIRMACION_LENGUAJE)) == OPCION_SI) {               
+      if (mensajeConfirmacion(local.devuelve(
+        Localizacion.CONFIRMACION_LENGUAJE)) == OPCION_SI) {               
         oyenteVista.eventoProducido(OyenteVista.Evento.CAMBIAR_LENGUAJE, 
                                     new Tupla(nuevoLenguaje, nuevoPais)); 
       } 
@@ -572,10 +580,17 @@ public class PartidaVista extends JFrame implements ActionListener, PropertyChan
    * 
    */
   private void recuperarEstadisticas(Tablero tablero){
-    contadorPortaviones.setText(String.valueOf(tablero.cuantosBarcosQuedan(FactoriaBarcos.PORTAVIONES)));
-    contadorCruceros.setText(String.valueOf(tablero.cuantosBarcosQuedan(FactoriaBarcos.CRUCERO)));
-    contadorDestructores.setText(String.valueOf(tablero.cuantosBarcosQuedan(FactoriaBarcos.DESTRUCTOR)));
-    contadorFragatas.setText(String.valueOf(tablero.cuantosBarcosQuedan(FactoriaBarcos.FRAGATA)));
+    contadorPortaviones.setText(String.valueOf(
+      tablero.cuantosBarcosQuedan(FactoriaBarcos.PORTAVIONES)));
+
+    contadorCruceros.setText(String.valueOf(
+      tablero.cuantosBarcosQuedan(FactoriaBarcos.CRUCERO)));
+
+    contadorDestructores.setText(String.valueOf(
+      tablero.cuantosBarcosQuedan(FactoriaBarcos.DESTRUCTOR)));
+      
+    contadorFragatas.setText(String.valueOf(
+      tablero.cuantosBarcosQuedan(FactoriaBarcos.FRAGATA)));
   }
   
   /**

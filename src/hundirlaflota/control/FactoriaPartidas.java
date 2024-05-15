@@ -26,7 +26,8 @@ public class FactoriaPartidas {
    * 
    */    
   public static Partida nuevaHundirLaFlota(PartidaVista vista) {
-    Partida partida = new Partida(vista, 10, 10);
+    Partida partida = new Partida(
+      vista, HundirLaFlota.COLUMNAS, HundirLaFlota.FILAS);
 
     partida.colocarBarco(FactoriaBarcos.PORTAVIONES);
     partida.colocarBarco(FactoriaBarcos.CRUCERO);
@@ -44,7 +45,8 @@ public class FactoriaPartidas {
    *  Devuelve partida de hundir la flota cargada desde fichero
    * 
    */  
-  public static Partida abreHundirLaFlota(PartidaVista vista, String fichero) throws Exception {
+  public static Partida abreHundirLaFlota(PartidaVista vista, String fichero) 
+  throws Exception {
     return new Partida(vista, fichero);    
   }  
 }

@@ -37,8 +37,8 @@ public class Barco {
    */
   public Barco(Scanner scanner) throws Exception {
     posiciones = new HashSet<Posicion>();
+
     while(scanner.hasNext()) {
-      
       if( scanner.hasNext(Partida.DELIMITADOR_POSICIONES )) {
         break;
       }

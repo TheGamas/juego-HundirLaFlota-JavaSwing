@@ -7,6 +7,7 @@
  */
 package hundirlaflota.vista;
 
+import hundirlaflota.control.HundirLaFlota;
 import hundirlaflota.control.OyenteVista;
 
 /**
@@ -20,7 +21,8 @@ public class FactoriaPartidasVista {
    */  
   public static PartidaVista HundirLaFlota(OyenteVista oyenteVista, String version,
                                       String lenguaje, String pais) { 
-    return PartidaVista.devolverInstancia(oyenteVista, version, 10, 10, 
-                                        lenguaje, pais);    
+    return PartidaVista.devolverInstancia(
+      oyenteVista, version, HundirLaFlota.FILAS, HundirLaFlota.COLUMNAS, 
+      lenguaje, pais);    
   } 
 }

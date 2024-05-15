@@ -105,11 +105,11 @@ public class DebugVista extends JFrame {
     texto.append("\n");
     
     if (e != null) {
-    // redirigimos traza exception a JTextArea
-    StringWriter stackTrace = new StringWriter();
-    e.printStackTrace(new PrintWriter(stackTrace));
-    texto.append(stackTrace.toString());
-    texto.append("\n"); 
+      // redirigimos traza exception a JTextArea
+      StringWriter stackTrace = new StringWriter();
+      e.printStackTrace(new PrintWriter(stackTrace));
+      texto.append(stackTrace.toString());
+      texto.append("\n"); 
     }
     
     texto.setCaretPosition(0);

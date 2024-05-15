@@ -45,7 +45,6 @@ public class Casilla extends JLabel {
     setEnabled(false);
     
     setHorizontalAlignment(SwingConstants.CENTER);
-    //setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
     setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
     
     if (recibeEventosRaton) {
